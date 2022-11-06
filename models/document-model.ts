@@ -4,7 +4,7 @@ const Schema = mongoose.Schema
 const DocumentSchema = new Schema(
     {
         name: { type: String, required: true },
-        content: { type: String, required: true }
+        content: { type: String, required: false }
     }, { timestamps: true }
 )
 

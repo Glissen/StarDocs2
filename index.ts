@@ -27,7 +27,7 @@ async function collectionList(req, res, next) {
 }
 
 async function collectionCreate(req, res, next) {
-    const { String: name } = req.body;
+    const { name } = req.body;
     if (name === '' || name === undefined || name === null) {
         res.status(200).json({ error: true, message: "Missing document name"});
     }
@@ -45,17 +45,16 @@ async function collectionCreate(req, res, next) {
 }
 
 async function collectionDelete(req, res, next) {
-    const { String: id } = req.body;
+    const { id } = req.body;
     if (id === '' || id === undefined || id === null) {
         res.status(200).json({ error: true, message: "Missing document id"});
     }
-
     await Document.findOneAndDelete({ _id: id });
-    return res.status(200);
+    return res.status(200).json({});
 }
 
 function mediaUpload(req, res, next) {
-    const { String: mediaid } = req.body;
+    const { mediaid } = req.body;
     if ( mediaid === '' || mediaid === undefined || mediaid === null) {
         res.status(200).json({ error: true, message: "Missing mediaid"});
     }
@@ -70,7 +69,7 @@ function mediaUpload(req, res, next) {
 }
 
 function mediaAccess(req, res, next) {
-    const { String: mediaid } = req.body;
+    const { mediaid } = req.body;
     if ( mediaid === '' || mediaid === undefined || mediaid === null) {
         res.status(200).json({ error: true, message: "Missing mediaid"});
     }
