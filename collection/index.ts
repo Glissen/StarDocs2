@@ -1,7 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
-import S3 from 'aws-sdk/clients/s3'
+// import S3 from 'aws-sdk/clients/s3'
 import dotenv from 'dotenv'
 
 import axios from 'axios'
