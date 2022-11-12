@@ -155,7 +155,7 @@ const verify = async (req, res) => {
 
 const getUserNameAndId = async (req, res) => {
     try {
-        const cookie = req.params.cookie;
+        const {cookie} = req.body;
         if (!cookie) {
             console.error("/users/getusernameandid: Missing parameter");
             return res.status(200).send({ error: true, message: "Missing parameter" })
@@ -187,7 +187,7 @@ app.post("/users/signup", singup)
 app.post("/users/login", login)
 app.post("/users/logout", logout)
 app.get("/users/verify", verify)
-app.get("/users/getusernameandid/:cookie", getUserNameAndId)
+app.post("/users/getusernameandid", getUserNameAndId)
 
 // db
 db.on('error', console.error.bind(console, 'MongoDB connection error: '))
