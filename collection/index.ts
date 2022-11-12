@@ -34,7 +34,7 @@ const addToRecent = (document: document): void => {
     recentDocument.splice(0, 0, document);
 }
 
-const getUserNameAndId = async (payload) => api.post(`/getUserNameAndId/`, payload);
+const getUserNameAndId = async (payload) => api.post(`/users/getusernameandid`, payload);
 
 const verify = async (cookie: string): Promise<{ name: string; id: string }> => {
     const payload = { cookie: cookie };
