@@ -97,7 +97,7 @@ const login = async (req, res) => {
                 httpOnly: true
             }).status(200).send({ name: existingUser.name });
         }
-        else 
+        else
             return res.status(200).send({ error: true, message: "User credentials incorrect" });
     }
     catch (e) {
@@ -119,7 +119,7 @@ const logout = async (req, res) => {
     }
 }
 
-const verify = async function (req, res) {
+const verify = async (req, res) => {
     try {
         console.log(req.query)
         const { email, key } = req.query;
@@ -153,10 +153,41 @@ const verify = async function (req, res) {
     }
 }
 
+const getUserNameAndId = async (req, res) => {
+    try {
+        const cookie = req.params.cookie;
+        if (!cookie) {
+            console.error("/users/getusernameandid: Missing parameter");
+            return res.status(200).send({ error: true, message: "Missing parameter" })
+        }
+        const id = auth.verifyJWT(cookie);
+        if (!id) {
+            console.error("/users/getusernameandid: Incorrect or expired cookie");
+            return res.status(200).send({ error: true, message: "Incorrect or expired cookie" })
+        }
+        const user = await User.findById({ id: id });
+        if (!user) {
+            console.error("/users/getusernameandid: Fail to find user");
+            return res.status(200).send({ error: true, message: "Fail to find user" })
+        }
+        if (!user.verified) {
+            console.error("/users/getusernameandid: User not verified");
+            return res.status(200).send({ error: true, message: "User not verified" })
+        }
+        console.log("/users/getusernameandid: Found user", user.name, id)
+        return res.status(200).send({ name: user.name, id: id });
+    }
+    catch (err) {
+        console.error("/users/getusernameandid: Get user name and id failed: " + err);
+        return res.status(200).send({ error: true, message: "An error has occurred" });
+    }
+}
+
 app.post("/users/signup", singup)
 app.post("/users/login", login)
 app.post("/users/logout", logout)
 app.get("/users/verify", verify)
+app.get("/users/getusernameandid/:cookie", getUserNameAndId)
 
 // db
 db.on('error', console.error.bind(console, 'MongoDB connection error: '))

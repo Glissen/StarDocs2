@@ -1,17 +1,16 @@
 import jwt from 'jsonwebtoken'
 
 export default class authManager {
-    static verifyJWT = (req) => {
+    static verifyJWT = (token) => {
         try {
-            const token = req.cookies.token;
             if (!token)
-                return 0;
+                return null;
 
             const verified = jwt.verify(token, process.env.JWT_SECRET)
             return verified.userId;
         } catch (e) {
             console.log("verifyJWT error: " + e);
-            return 0;
+            return null;
         }
     }
 
