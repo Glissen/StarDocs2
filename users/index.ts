@@ -165,7 +165,7 @@ const getUserNameAndId = async (req, res) => {
             console.error("/users/getusernameandid: Incorrect or expired cookie");
             return res.status(200).send({ error: true, message: "Incorrect or expired cookie" })
         }
-        const user = await User.findById({ id: id });
+        const user = await User.findById({ _id: id });
         if (!user) {
             console.error("/users/getusernameandid: Fail to find user");
             return res.status(200).send({ error: true, message: "Fail to find user" })
