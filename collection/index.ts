@@ -59,7 +59,7 @@ const collectionList = async (req, res, next) => {
         const cookie = req.cookies.token;
         const user = await verify(cookie);
         if (!user.name || !user.id) {
-            console.error("/collection/list: Unauthourized user")
+            console.error("/collection/list: Unauthorized user")
             return res.status(200).send({ error: true, message: "Unauthourized user" });
         }
         let response = Array<document>();
@@ -79,12 +79,12 @@ const collectionCreate = async (req, res, next) => {
         const cookie = req.cookies.token;
         const user = await verify(cookie);
         if (!user.name || !user.id) {
-            console.error("/collection/list: Unauthourized user")
+            console.error("/collection/create: Unauthorized user")
             return res.status(200).send({ error: true, message: "Unauthourized user" });
         }
         const { name } = req.body;
         if (!name) {
-            console.error("/collection/list: Missing document name")
+            console.error("/collection/create: Missing document name")
             res.status(200).json({ error: true, message: "Missing document name" });
         }
 
@@ -95,7 +95,7 @@ const collectionCreate = async (req, res, next) => {
         await doc.save();
         const id = doc._id;
         addToRecent({ name: name, id: id })
-        console.log("/collection/list: Created document:" + name, id)
+        console.log("/collection/create: Created document:" + name, id)
         return res.status(200).send({ id: id })
     }
     catch (err) {
@@ -210,18 +210,15 @@ const collectionDelete = async (req, res, next) => {
 
 // }
 
-app.post('/api/collection/create', collectionCreate);
-app.post('/api/collection/delete', collectionDelete);
-app.get('/api/collection/list', collectionList);
+app.post('/collection/create', collectionCreate);
+app.post('/collection/delete', collectionDelete);
+app.get('/collection/list', collectionList);
 
 // app.post('/api/media/upload', mediaUpload);
 // app.get('/api/media/access', mediaAccess);
 
 db.on('error', console.error.bind(console, "MongoDB connection error: "));
 
-app.listen(PORT, () => {
-    console.log("Listening on port ", PORT);
-})
 
 type document = {
     name: string,
