@@ -1,9 +1,8 @@
-const mongoose = require('mongoose')
-const dotenv = require('dotenv')
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
 dotenv.config();
 
-mongoose
-    .connect(process.env.URL, { useNewUrlParser: true })
+mongoose.connect(process.env.MONGO_URL, {dbName: process.env.MONGO_DBNAME, user: process.env.MONGO_USER, pass: process.env.MONGO_PASS})
     .then(() => {
         console.log('Connected to database')
     })

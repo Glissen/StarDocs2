@@ -9,11 +9,11 @@ import User from './models/user-model'
 import Token from './models/token-model'
 import auth from './auth';
 
+dotenv.config();
 const app: express.Application = express();
 const port: number = parseInt(process.env.EXPRESS_PORT);
 app.use(express.json());
 app.use(cookieParser());
-dotenv.config();
 
 const singup = async (req, res) => {
     try {
@@ -21,14 +21,14 @@ const singup = async (req, res) => {
         console.log("Signup received:", name, email, password);
 
         if (!name || !email || !password) {
-            console.log("/users/signup: Missing user credentials")
+            console.error("/users/signup: Missing user credentials")
             return res.status(200).send({ error: true, message: "Missing user credentials" });
         }
 
         const existingName = await User.findOne({ name: name });
         const existingEmail = await User.findOne({ email: email });
         if (existingName || existingEmail) {
-            console.log("/users/signup: User with this credential already exists");
+            console.error("/users/signup: User with this credential already exists");
             return res.status(200).send({ error: true, message: "User with this credential already exists" });
         }
 
@@ -54,7 +54,7 @@ const singup = async (req, res) => {
 
         const sent = await sendEmail(newUser.email, link, link);
         if (!sent) {
-            console.log("/users/signup: Verification email failed to send");
+            console.error("/users/signup: Verification email failed to send");
             return res.status(200).send({ error: true, message: "An error has occurred" });
         }
 
@@ -63,7 +63,7 @@ const singup = async (req, res) => {
         return res.status(200).send({});
     }
     catch (e) {
-        console.log("/users/signup: Error occurred: " + e);
+        console.error("/users/signup: Error occurred: " + e);
         return res.status(200).send({ error: true, message: "An error has occurred" })
     }
 }
@@ -73,18 +73,18 @@ const login = async (req, res) => {
         const { email, password } = req.body;
         console.log("Login received:", email, password);
         if (!email || !password) {
-            console.log("/users/login: Missing user credentials")
+            console.error("/users/login: Missing user credentials")
             return res.status(200).send({ error: true, message: "Missing user credentials" });
         }
 
         const existingUser = await User.findOne({ email: email });
         if (!existingUser) {
-            console.log("/users/login: User does not exist");
+            console.error("/users/login: User does not exist");
             return res.status(200).send({ error: true, message: "User does not exist" });
         }
 
         if (!existingUser.verified) {
-            console.log("/users/login: User account not verified");
+            console.error("/users/login: User account not verified");
             return res.status(200).send({ error: true, message: "User account not verified" });
         }
 
@@ -101,7 +101,7 @@ const login = async (req, res) => {
             return res.status(200).send({ error: true, message: "User credentials incorrect" });
     }
     catch (e) {
-        console.log("/users/login: Error occured: " + e);
+        console.error("/users/login: Error occured: " + e);
         return res.status(200).send({ error: true, message: "An error has occurred" });
     }
 }
@@ -125,19 +125,19 @@ const verify = async (req, res) => {
         const { email, key } = req.query;
 
         if (!email || !key) {
-            console.log("/users/verify: Missing user credentials")
+            console.error("/users/verify: Missing user credentials")
             return res.status(200).send({ error: true, message: "Missing user credentials" });
         }
 
         const foundToken = await Token.findOneAndDelete({ token: key });
         if (!foundToken || email != foundToken.email) {
-            console.log("/users/verify: Link expired");
+            console.error("/users/verify: Link expired");
             return res.status(200).send({ error: true, message: "This link has expired" });
         }
 
         const user = await User.findOne({ email: email });
         if (!user) {
-            console.log("/users/verify: User does not exist");
+            console.error("/users/verify: User does not exist");
             return res.status(200).send({ error: true, message: "User does not exist" });
         }
 
