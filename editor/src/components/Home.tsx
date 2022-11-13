@@ -57,6 +57,19 @@ export default function Home() {
         }
     }
 
+    const collectionDelete = async(index: any) => {
+        const response = await api.post('/collection/delete', {
+            id: documents[index].id,
+        })
+
+        if (response.status === 200) {
+            console.log("/collection/delete success");
+        }
+        else {
+            console.error("/collection/delete error");
+        }
+    }
+
   return (
     <div id="home">
         <div id="edit-links">
@@ -69,7 +82,7 @@ export default function Home() {
         <div id="delete-links">
             {documents.map((doc, index) => {
                 const link = `http://duolcpu.cse356.compas.cs.stonybrook.edu/collection/delete/${doc.id}`
-                return <a href={link}>{link}</a>
+                return <a href="/" onClick={() => collectionDelete(index)}>{link}</a>
             })}
         </div>
         <br></br>
