@@ -5,7 +5,7 @@ import { fromUint8Array } from "js-base64";
 import axios from "axios";
 import 'react-quill/dist/quill.snow.css';
 
-export default function Editor(props: {id: any, doc: any}) {
+export default function Editor(props: {id: any, doc: any, presences: any}) {
     let editor : any = null;
     let ref : any = null;
     useEffect(() => {
@@ -13,9 +13,10 @@ export default function Editor(props: {id: any, doc: any}) {
         const content = props.doc.getText('quill');
         new QuillBinding(content, editor);
         props.doc.on('update', async(update: any) => {
-            await axios.post(`/api/op/${props.id}`, {
+            await axios.post(`http://duolcpu.cse356.compas.cs.stonybrook.edu/api/op/${props.id}`, {
                 update: fromUint8Array(update)
             })
+
         })
     }, [])
 
