@@ -51,12 +51,12 @@ const mediaUpload = async (req, res) => {
             return res.status(200).send({ error: true, message: "Unauthourized user" });
         }
         const file = req.body;
-        const contentType = req.headers['content-type'];
+        const contentType = req.header('content-type');
 
         if (!file) {
             return res.status(200).send({ error: true, message: "Missing file" });
         }
-        if (contentType !== 'image/jpeg' || contentType !== 'image/png') {
+        if (contentType !== 'image/jpeg' && contentType !== 'image/png') {
             return res.status(200).send({ error: true, message: "Only accept jpeg/png file" });
         }
 
