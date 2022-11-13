@@ -28,7 +28,7 @@ const api = axios.create({
 const recentDocument = Array<document>()
 
 const addToRecent = (document: document): void => {
-    const index = recentDocument.findIndex((element) => { element.id === document.id && element.name === document.name });
+    const index = recentDocument.findIndex((element) => { return element.id.toHexString() === document.id.toHexString() });
     if (index !== -1)
         recentDocument.splice(index, 1);
     recentDocument.splice(0, 0, document);
@@ -119,7 +119,7 @@ const collectionDelete = async (req, res, next) => {
         }
         const doc = await Document.findOneAndDelete({ _id: id });
         if (doc) {
-            const index = recentDocument.findIndex((element) => { element.id === doc._id && element.name === doc.name });
+            const index = recentDocument.findIndex((element) => { return element.id.toHexString() === doc._id.toHexString() });
             if (index !== -1)
                 recentDocument.splice(index, 1);
             return res.status(200).send({});
