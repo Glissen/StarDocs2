@@ -325,6 +325,7 @@ app.post('/collection/create', collectionCreate);
 app.post('/collection/delete', collectionDelete);
 app.get('/collection/list', collectionList);
 
+app.get('/api/connect/:id', connect);
 app.post('/api/connect/:id', connect);
 app.post('/api/op/:id', op);
 app.post('/api/presence/:id', presence)
