@@ -15,7 +15,7 @@ const port: number = parseInt(process.env.EXPRESS_PORT);
 app.use(express.json());
 app.use(cookieParser());
 
-const singup = async (req, res) => {
+const signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
         console.log("Signup received:", name, email, password);
@@ -183,7 +183,7 @@ const getUserNameAndId = async (req, res) => {
     }
 }
 
-app.post("/users/signup", singup)
+app.post("/users/signup", signup)
 app.post("/users/login", login)
 app.post("/users/logout", logout)
 app.get("/users/verify", verify)
