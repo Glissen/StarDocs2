@@ -54,16 +54,16 @@ const mediaUpload = async (req, res) => {
         const contentType = req.headers['content-type'];
 
         if (!file) {
-            return res.status(200).json({ error: true, message: "Missing file" });
+            return res.status(200).send({ error: true, message: "Missing file" });
         }
         if (contentType !== 'image/jpeg' || contentType !== 'image/png') {
-            return res.status(200).json({ error: true, message: "Only accept jpeg/png file" });
+            return res.status(200).send({ error: true, message: "Only accept jpeg/png file" });
         }
 
         let key = '';
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         const len = alphabet.length;
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 16; i++) {
             key += alphabet.charAt(Math.floor(Math.random() * len));
         }
 
@@ -84,12 +84,12 @@ const mediaUpload = async (req, res) => {
         s3.putObject(params, (error, data) => {
             if (error) {
                 console.log(error);
-                return res.status(200).json({});
+                return res.status(200).send({ error: true, message: "Fail to put in"});
             }
             else {
                 console.log("Media stored -- Key: ", key);
                 console.log(data);
-                return res.status(200).json({ mediaid: key });
+                return res.status(200).send({ mediaid: key });
             }
         })
     }
@@ -115,8 +115,8 @@ const mediaAccess = async (req, res) => {
 
         const s3 = new S3({
             endpoint: process.env.S3_ENDPOINT,
-            accessKeyId: process.env.accessKeyId,
-            secretAccessKey: process.env.secretAccessKey,
+            accessKeyId: process.env.S3_ACCESSKEYID,
+            secretAccessKey: process.env.S3_SECRETACCESSKEY,
             sslEnabled: true
         });
 
@@ -131,12 +131,10 @@ const mediaAccess = async (req, res) => {
                 return res.status(200).send({error: true, message: "fail to get image"});
             }
             else {
-                const buffer = data.Body;
                 console.log("Media Retrieved");
-                console.log(data.Body);
                 const contentType = data.ContentType;
                 res.set({ 'Content-Type': contentType });
-                return res.status(200).send(buffer);
+                return res.status(200).send(data.Body);
             }
         })
     }
