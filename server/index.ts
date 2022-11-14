@@ -691,6 +691,7 @@ app.post('/api/op/:id', op);
 app.post('/api/presence/:id', presence)
 
 app.post('/media/upload', uploadS3.single("file"), async (req, res) => { 
+    console.log(req.file);
     if (!req.session.session_id) {
         const user = await getUserNameAndId(req.cookies.token)
         if (!user) {
