@@ -231,7 +231,7 @@ const fileToBinary = async(file) => {
         reader.addEventListener("load", () => resolve(reader.result));
         reader.addEventListener("error", err => reject(err));
 
-        reader.readAsArrayBuffer(file);
+        reader.readAsBinaryString(file);
     });
 }
 
@@ -335,7 +335,15 @@ const mediaAccess = async (req, res) => {
                 console.log("Media Retrieved");
                 const contentType = data.ContentType;
                 res.set({ 'Content-Type': contentType });
-                const file = new File(data.Body, "file");
+
+                const buf = Buffer.from(data.Body.toString(), "binary");
+
+                const aBuf = new ArrayBuffer(buf.length);
+                const temp = new Uint8Array(aBuf);
+                for (let i = 0; i < buf.length; i++) {
+                    temp[i] = buf[i];
+                }
+                const file = new File([aBuf], "file", { type: contentType });
                 return res.status(200).send(file);
             }
         })
