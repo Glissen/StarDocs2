@@ -266,9 +266,7 @@ const uploadS3 = multer({
       s3: s3,
       acl: 'public-read',
       bucket: 'images',
-      key: (req, file, cb) => {
-        cb(null, Date.now().toString() + '-' + file.originalname)
-      }
+      key: makeId(),
     })
   });
 
@@ -690,7 +688,19 @@ app.post('/api/connect/:id', connect);
 app.post('/api/op/:id', op);
 app.post('/api/presence/:id', presence)
 
-app.post('/media/upload', uploadS3.single("file"), (req, res) => { console.log(req.file) });
+app.post('/media/upload', uploadS3.single("file"), async (req, res) => { 
+    if (!req.session.session_id) {
+        const user = await getUserNameAndId(req.cookies.token)
+        if (!user) {
+            console.error("/media/upload: Unauthorized user")
+            return res.status(200).send({ error: true, message: "Unauthourized user" });
+        }
+        req.session.session_id = makeId();
+        req.session.name = user.name;
+
+        return res.status(200).send({ mediaid: req.file.key });
+    }
+});
 app.get('/media/access/:mediaid', mediaAccess);
 
 app.post("/users/signup", signup)
