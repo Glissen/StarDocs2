@@ -266,7 +266,9 @@ const uploadS3 = multer({
       s3: s3,
       acl: 'public-read',
       bucket: 'images',
-      key: "abc"
+      key: (req, file, cb) => {
+        cb(null, Date.now().toString() + '-' + file.originalname)
+      }
     })
   });
 
