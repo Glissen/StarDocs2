@@ -13,7 +13,7 @@ import auth from './auth';
 
 import S3 from 'aws-sdk/clients/s3'
 import session from 'express-session';
-import Document from './models/document-model';
+// import Document from './models/document-model';
 
 import mongoose, { ObjectId } from 'mongoose'
 
@@ -432,16 +432,17 @@ const collectionCreate = async (req, res) => {
             res.status(200).json({ error: true, message: "Missing document name" });
         }
 
-        const doc = new Document({
-            name: name
-        });
+        // const doc = new Document({
+        //     name: name
+        // });
 
-        await doc.save();
-        const id = doc._id;
+        // await doc.save();
+        const id = makeId();
         addToRecent({ name: name, id: id })
         console.log("/collection/create: Created document:" + name, id)
         const ydoc = {
             doc: new Y.Doc(),
+            name: name,
             clients: new Map(),
             cursors: new Map()
         };
@@ -472,19 +473,14 @@ const collectionDelete = async (req, res) => {
             console.error("/collection/delete: Missing document id")
             return res.status(200).send({ error: true, message: "Missing document id" });
         }
-        const doc = await Document.findOneAndDelete({ _id: id });
+        const doc = ydocs.get(id)
         if (doc) {
-            const index = recentDocument.findIndex((element) => { return element.id.toHexString() === doc._id.toHexString() });
+            const index = recentDocument.findIndex((element) => { return element.id === id });
             if (index !== -1)
                 recentDocument.splice(index, 1);
-            // TODO: delete ydoc and disconnect all clients
-            // const ydoc = ydocs.get(doc._id.toString());
-            // if (!ydoc) {
-            //     console.error("/api/delete: Fail to find document with id from map: " + id)
-            //     return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-            // }
-
-            // ydocs.delete(doc._id.toString());
+            doc.clients.forEach(client => {
+                client.response.status(200).send();
+            })
             return res.status(200).send({});
         }
         else {
@@ -518,13 +514,13 @@ const connect = async (req, res) => {
             console.error("/api/connect: Missing document id")
             return res.status(200).send({ error: true, message: "Missing document id" });
         }
-        const doc = await Document.findById({ _id: id });
-        if (!doc) {
-            console.error("/api/connect: Fail to find document with id: " + id)
-            return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-        }
+        // const doc = await Document.findById({ _id: id });
+        // if (!doc) {
+        //     console.error("/api/connect: Fail to find document with id: " + id)
+        //     return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+        // }
 
-        const ydoc = ydocs.get(doc._id.toString());
+        const ydoc = ydocs.get(id);
         if (!ydoc) {
             console.error("/api/connect: Fail to find document with id: " + id)
             return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
@@ -553,11 +549,11 @@ const connect = async (req, res) => {
 
         res.on('close', () => {
             console.log(`${clientId} Connection closed`);
-            let tempdoc = ydocs.get(doc._id.toString());
-            if (tempdoc) {
-                tempdoc.clients.delete(clientId)
-                tempdoc.cursors.delete(clientId)
-                tempdoc.clients.forEach((client) => {
+            let doc = ydocs.get(id);
+            if (doc) {
+                doc.clients.delete(clientId)
+                doc.cursors.delete(clientId)
+                doc.clients.forEach((client) => {
                     client.response.write("event: presence\ndata: " + JSON.stringify({ session_id: clientId, name: req.session.name, cursor: {} }) + "\n\n");
                 })
             }
@@ -588,20 +584,20 @@ const op = async (req, res) => {
             console.error("/api/op: Missing document id")
             return res.status(200).send({ error: true, message: "Missing document id" });
         }
-        const doc = await Document.findById({ _id: id });
-        if (!doc) {
-            console.error("/api/op: Fail to find document with id: " + id)
-            return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-        }
+        // const doc = await Document.findById({ _id: id });
+        // if (!doc) {
+        //     console.error("/api/op: Fail to find document with id: " + id)
+        //     return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+        // }
 
         console.log("Doc " + id + " receives Update: " + update)
-        const ydoc = ydocs.get(doc._id.toString());
+        const ydoc = ydocs.get(id);
         if (ydoc) {
             console.log("Found doc " + id)
             // console.log("Text before update: " + ydoc.doc.getText().toString())
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
-            addToRecent({ name: doc.name, id: doc._id })
+            addToRecent({ name: ydoc.name, id: id })
             ydoc.clients.forEach((client, key) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
                 console.log("Sending update to client " + key)
@@ -644,13 +640,13 @@ const presence = async (req, res) => {
             console.error("/api/presence: Missing document id")
             return res.status(200).send({ error: true, message: "Missing document id" });
         }
-        const doc = await Document.findById({ _id: id });
-        if (!doc) {
-            console.error("/api/presence: Fail to find document with id: " + id)
-            return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-        }
+        // const doc = await Document.findById({ _id: id });
+        // if (!doc) {
+        //     console.error("/api/presence: Fail to find document with id: " + id)
+        //     return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+        // }
 
-        const ydoc = ydocs.get(doc._id.toString());
+        const ydoc = ydocs.get(id);
         if (ydoc) {
             console.log("Found doc " + id)
             let tmpcursor = ydoc.cursors.get(clientId)
@@ -731,12 +727,13 @@ app.listen(port, (err?) => {
 
 type document = {
     name: string,
-    id: mongoose.Types.ObjectId
+    id: string
 }
 
 
 type ydoc = {
     doc: any,
+    name: string
     clients: Map<string, client>,
     cursors: Map<string, cursor>
 }
