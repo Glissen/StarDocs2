@@ -228,7 +228,6 @@ const verify = async (req, res) => {
         await user.save();
 
         console.log("/users/verify: New user successfully verified")
-        await new Promise(r => setTimeout(r, 2000));
         return res.status(200).send({ status: 'OK' });
     }
     catch (err) {
