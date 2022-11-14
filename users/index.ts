@@ -110,7 +110,8 @@ const logout = async (req, res) => {
     try {
         console.log("/users/logout: User successfully logged out")
         return await res.cookie("token", "", {
-            httpOnly: true
+            httpOnly: true,
+            
         }).status(200).send({});
     }
     catch (e) {

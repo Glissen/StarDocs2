@@ -7,7 +7,7 @@ import dotenv from 'dotenv'
 import * as Y from 'yjs';
 import axios from 'axios'
 
-import Document from './models/document-model'; './models/document-model'
+import Document from './models/document-model';
 import db from './db'
 import mongoose, { ObjectId } from 'mongoose'
 
@@ -172,6 +172,7 @@ const collectionDelete = async (req, res) => {
 
 const connect = async (req, res) => {
     try {
+        console.log("/api/connect: calling connect")
         if (!req.session.session_id)
             req.session.session_id = makeId();
         const cookie = req.cookies.token;
