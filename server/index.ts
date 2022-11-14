@@ -568,7 +568,7 @@ const connect = async (req, res) => {
 
 const op = async (req, res) => {
     try {
-        console.log("apiOP receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        //console.log("apiOP receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -591,13 +591,13 @@ const op = async (req, res) => {
             return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
         }
 
-        console.log("Doc " + id + " receives Update: " + update)
+        //console.log("Doc " + id + " receives Update: " + update)
         const ydoc = ydocs.get(doc._id.toString());
         if (ydoc) {
-            console.log("Found doc " + id)
-            console.log("Text before update: " + ydoc.doc.getText().toString())
+            //console.log("Found doc " + id)
+            //console.log("Text before update: " + ydoc.doc.getText().toString())
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
-            console.log("Text after update: " + ydoc.doc.getText().toString())
+            //console.log("Text after update: " + ydoc.doc.getText().toString())
             addToRecent({ name: doc.name, id: doc._id })
             ydoc.clients.forEach((client, key) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
