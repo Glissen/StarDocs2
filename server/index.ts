@@ -599,7 +599,8 @@ const op = async (req, res) => {
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
             addToRecent({ name: ydoc.name, id: id })
-            ydoc.clients.forEach((client, key) => {
+            res.send({});
+            return ydoc.clients.forEach((client, key) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
                 console.log("Sending update to client " + key)
             });
@@ -608,7 +609,7 @@ const op = async (req, res) => {
             console.log("Fail to find doc " + id)
             return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
         }
-        return res.send({});
+        
     }
     catch (err) {
         console.error("/api/op: Error occurred: " + err);
