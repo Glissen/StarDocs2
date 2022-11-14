@@ -30,7 +30,7 @@ const port: number = parseInt(process.env.EXPRESS_PORT);
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({extended: true}));
 // app.use(upload.array())
 // app.use(express.static('public'));
 app.use(bodyParser.raw({
