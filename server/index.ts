@@ -492,9 +492,9 @@ const connect = async (req, res) => {
 
         ydoc.clients.forEach((client, key) => {
             if (key !== clientId) {
-                res.write("event: presence\ndata: " + JSON.stringify({ session: key, name: client.name, cursor: client.cursor }))
+                res.write("event: presence\ndata: " + JSON.stringify({ session: key, name: client.name, cursor: client.cursor }) + "\n\n")
             }
-            client.response.write("event: presence\ndata: " + JSON.stringify({ session: clientId, name: req.session.name, cursor: {} }))
+            client.response.write("event: presence\ndata: " + JSON.stringify({ session: clientId, name: req.session.name, cursor: {} }) + "\n\n")
         })
 
         res.on('close', () => {
