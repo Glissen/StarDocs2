@@ -197,7 +197,7 @@ const verify = async (req, res) => {
 
 const mediaUpload = async (req, res) => {
     try {
-        console.log("mediaUpload receive request: " + req.session.session_id)
+        console.log("mediaUpload receive request: " + req.session)
         if (!req.session.session_id) {
             console.error("/media/upload: Unauthorized user")
             return res.status(200).send({ error: true, message: "Unauthourized user" });
@@ -255,7 +255,7 @@ const mediaUpload = async (req, res) => {
 
 const mediaAccess = async (req, res) => {
     try {
-        console.log("mediaAccess receive request: " + req.session.session_id)
+        console.log("mediaAccess receive request: " + req.session)
         if (!req.session.session_id) {
             console.error("/media/access: Unauthorized user")
             return res.status(200).send({ error: true, message: "Unauthourized user" });
@@ -300,7 +300,7 @@ const mediaAccess = async (req, res) => {
 
 const collectionList = async (req, res) => {
     try {
-        console.log("collectionList receive request: " + req.session.session_id)
+        console.log("collectionList receive request: " + req.session)
         if (!req.session.session_id) {
             console.error("/collection/list: Unauthorized user")
             return res.status(200).send({ error: true, message: "Unauthourized user" });
@@ -320,7 +320,7 @@ const collectionList = async (req, res) => {
 
 const collectionCreate = async (req, res) => {
     try {
-        console.log("collectionCreate receive request: " + req.session.session_id)
+        console.log("collectionCreate receive request: " + req.session)
         if (!req.session.session_id) {
             console.error("/collection/create: Unauthorized user")
             return res.status(200).send({ error: true, message: "Unauthourized user" });
@@ -355,7 +355,7 @@ const collectionCreate = async (req, res) => {
 
 const collectionDelete = async (req, res) => {
     try {
-        console.log("collectionDelete receive request: " + req.session.session_id)
+        console.log("collectionDelete receive request: " + req.session)
         if (!req.session.session_id) {
             console.error("/collection/delete: Unauthorized user")
             return res.status(200).send({ error: true, message: "Unauthourized user" });
@@ -394,7 +394,7 @@ const collectionDelete = async (req, res) => {
 
 const connect = async (req, res) => {
     try {
-        console.log("apiConnect receive request: " + req.session.session_id)
+        console.log("apiConnect receive request: " + req.session)
         if (!req.session.session_id) {
             console.error("/api/connect: Unauthorized user")
             return res.status(200).send({ error: true, message: "Unauthourized user" });
@@ -461,7 +461,7 @@ const connect = async (req, res) => {
 
 const op = async (req, res) => {
     try {
-        console.log("apiOP receive request: " + req.session.session_id)
+        console.log("apiOP receive request: " + req.session)
         if (!req.session.session_id) {
             console.error("/api/op: Unauthorized user")
             return res.status(200).send({ error: true, message: "Unauthourized user" });
@@ -506,7 +506,7 @@ const op = async (req, res) => {
 
 const presence = async (req, res) => {
     try {
-        console.log("apiPresence receive request: " + req.session.session_id)
+        console.log("apiPresence receive request: " + req.session)
         if (!req.session.session_id) {
             console.error("/api/presence: Unauthorized user")
             return res.status(200).send({ error: true, message: "Unauthourized user" });
