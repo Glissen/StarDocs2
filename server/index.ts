@@ -16,6 +16,9 @@ import Document from './models/document-model';
 
 import mongoose, { ObjectId } from 'mongoose'
 
+const multer = require('multer')
+let upload = multer()
+
 import * as Y from 'yjs';
 
 const fs = require('fs')
@@ -28,6 +31,8 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(express.urlencoded({ extended: true }));
+app.use(upload.array())
+app.use(express.static('public'));
 app.use(bodyParser.raw({
     type: ['image/png', 'image/jpeg'],
     limit: '10mb'
