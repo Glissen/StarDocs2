@@ -191,6 +191,7 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
     try {
         console.log("/users/logout: User successfully logged out")
+        req.session.session_id = undefined;
         return await res.cookie("token", "", {
             httpOnly: true,
 
