@@ -29,7 +29,7 @@ const port: number = parseInt(process.env.EXPRESS_PORT);
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 // app.use(upload.array())
 // app.use(express.static('public'));
@@ -268,7 +268,6 @@ const mediaUpload = async (req, res) => {
         
         let file = req.body;
         console.log(req.body);
-        console.log(file.toString())
         file = await fileToBinary(file);
         console.log(file);
         const contentType = req.header('content-type');
