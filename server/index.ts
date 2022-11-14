@@ -439,7 +439,8 @@ const collectionCreate = async (req, res) => {
         console.log("/collection/create: Created document:" + name, id)
         const ydoc = {
             doc: new Y.Doc(),
-            clients: new Map()
+            clients: new Map(),
+            cursors: new Map()
         };
         ydocs.set(id.toString(), ydoc)
         return res.status(200).send({ id: id })
@@ -534,20 +535,17 @@ const connect = async (req, res) => {
         res.writeHead(200, headers);
 
         const clientId: string = req.session.session_id
-        ydoc.clients.set(clientId, {
-            name: req.session.name,
-            cursor: {},
-            response: res
-        });
+        ydoc.clients.set(clientId, 
+            {response: res}
+        );
         console.log("Connecting client " + clientId + " to doc " + id)
 
         res.write("event: sync\ndata: " + Y.encodeStateAsUpdate(ydoc.doc).toString() + "\n\n")
 
-        ydoc.clients.forEach((client, key) => {
-            if (key !== clientId) {
-                res.write("event: presence\ndata: " + JSON.stringify({ session: key, name: client.name, cursor: client.cursor }) + "\n\n")
-            }
-            client.response.write("event: presence\ndata: " + JSON.stringify({ session: clientId, name: req.session.name, cursor: {} }) + "\n\n")
+        ydoc.cursors.forEach((cursor, key) => {
+            // if (key !== clientId) {
+                res.write("event: presence\ndata: " + JSON.stringify({ session: key, name: cursor.name, cursor: cursor.cursor }) + "\n\n")
+            // }
         })
 
         res.on('close', () => {
@@ -555,6 +553,7 @@ const connect = async (req, res) => {
             let tempdoc = ydocs.get(doc._id.toString());
             if (tempdoc) {
                 tempdoc.clients.delete(clientId)
+                tempdoc.cursors.delete(clientId)
                 tempdoc.clients.forEach((client) => {
                     client.response.write("event: presence\ndata: " + JSON.stringify({ session_id: clientId, name: req.session.name, cursor: {} }) + "\n\n");
                 })
@@ -651,14 +650,16 @@ const presence = async (req, res) => {
         const ydoc = ydocs.get(doc._id.toString());
         if (ydoc) {
             console.log("Found doc " + id)
-            const tmpclient = ydoc.clients.get(clientId)
-            if (!tmpclient) {
-                console.error("/api/presence: Fail to find client with id: " + clientId)
-                return res.status(200).send({ error: true, message: "Fail to find client with id: " + clientId });
+            let tmpcursor = ydoc.cursors.get(clientId)
+            if (!tmpcursor) {
+                // console.error("/api/presence: Fail to find client with id: " + clientId)
+                // return res.status(200).send({ error: true, message: "Fail to find client with id: " + clientId });
+                tmpcursor = {name: req.session.name, cursor: {}}
             }
-            tmpclient.cursor = { index: index, length: length }
+            tmpcursor.cursor = { index: index, length: length }
+            ydoc.cursors.set(clientId, tmpcursor)
             ydoc.clients.forEach((client, key) => {
-                client.response.write("event: presence\ndata: " + JSON.stringify({ session_id: clientId, name: tmpclient.name, cursor: tmpclient.cursor }) + "\n\n");
+                client.response.write("event: presence\ndata: " + JSON.stringify({ session_id: clientId, name: tmpcursor.name, cursor: tmpcursor.cursor }) + "\n\n");
                 console.log("Sending presence to client " + key)
             });
         }
@@ -733,11 +734,15 @@ type document = {
 
 type ydoc = {
     doc: any,
-    clients: Map<string, client>
+    clients: Map<string, client>,
+    cursors: Map<string, cursor>
 }
 
 type client = {
+    response: any
+}
+
+type cursor = {
     name: string,
     cursor: { index: number, length: number } | {},
-    response: any
 }
