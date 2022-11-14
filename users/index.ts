@@ -52,7 +52,6 @@ const signup = async (req, res) => {
         const link = 'http://duolcpu.cse356.compas.cs.stonybrook.edu/users/verify?' + "email=" + encodeURIComponent(newUser.email) + "&key=" + encodeURIComponent(newToken.token);
         console.log(link)
 
-        await new Promise(r => setTimeout(r, 2000));
         const sent = await sendEmail(newUser.email, link, link);
         if (!sent) {
             console.error("/users/signup: Verification email failed to send");
