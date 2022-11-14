@@ -244,9 +244,9 @@ const mediaUpload = async (req, res) => {
         if (!file) {
             return res.status(200).send({ error: true, message: "Missing file" });
         }
-        if (contentType !== 'image/jpeg' && contentType !== 'image/png') {
-            return res.status(200).send({ error: true, message: "Only accept jpeg/png file" });
-        }
+        // if (contentType !== 'image/jpeg' && contentType !== 'image/png') {
+        //     return res.status(200).send({ error: true, message: "Only accept jpeg/png file" });
+        // }
 
         const key = makeId()
 
