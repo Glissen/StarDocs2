@@ -18,6 +18,8 @@ import mongoose, { ObjectId } from 'mongoose'
 
 import * as Y from 'yjs';
 
+const fs = require('fs')
+
 dotenv.config();
 const app: express.Application = express();
 const port: number = parseInt(process.env.EXPRESS_PORT);
@@ -224,15 +226,24 @@ const verify = async (req, res) => {
     }
 }
 
-const fileToBinary = async(file) => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
+// const fileToBinary = async(file) => {
+//     return new Promise((resolve, reject) => {
+//         const reader = new FileReader();
 
-        reader.addEventListener("load", () => resolve(reader.result));
-        reader.addEventListener("error", err => reject(err));
+//         reader.addEventListener("load", () => resolve(reader.result));
+//         reader.addEventListener("error", err => reject(err));
 
-        reader.readAsBinaryString(file);
-    });
+//         reader.readAsBinaryString(file);
+//     });
+// }
+
+const fileToBinary = (file) => {
+    fs.readFile(file, 'utf8', function(error, data) {
+        if (error)
+            return console.error(error);
+        console.log(data);
+        return data;
+    })
 }
 
 const mediaUpload = async (req, res) => {
