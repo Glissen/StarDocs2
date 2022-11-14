@@ -54,6 +54,35 @@ const makeId = () => {
     return ID;
 }
 
+const getUserNameAndId = async (cookie) => {
+    try {
+        if (!cookie) {
+            console.error("/users/getusernameandid: Missing parameter");
+            return null;
+        }
+        const id = auth.verifyJWT(cookie);
+        if (!id) {
+            console.error("/users/getusernameandid: Incorrect or expired cookie");
+            return null
+        }
+        const user = await User.findById({ _id: id });
+        if (!user) {
+            console.error("/users/getusernameandid: Fail to find user");
+            return null
+        }
+        if (!user.verified) {
+            console.error("/users/getusernameandid: User not verified");
+            return null
+        }
+        console.log("/users/getusernameandid: Found user", user.name, id)
+        return { name: user.name, id: id }
+    }
+    catch (err) {
+        console.error("/users/getusernameandid: Get user name and id failed: " + err);
+        return null
+    }
+}
+
 const signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -199,8 +228,13 @@ const mediaUpload = async (req, res) => {
     try {
         console.log("mediaUpload receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
-            console.error("/media/upload: Unauthorized user")
-            return res.status(200).send({ error: true, message: "Unauthourized user" });
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/media/upload: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
         }
         
         const file = req.body;
@@ -213,12 +247,7 @@ const mediaUpload = async (req, res) => {
             return res.status(200).send({ error: true, message: "Only accept jpeg/png file" });
         }
 
-        let key = '';
-        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        const len = alphabet.length;
-        for (let i = 0; i < 16; i++) {
-            key += alphabet.charAt(Math.floor(Math.random() * len));
-        }
+        const key = makeId()
 
         const s3 = new S3({
             endpoint: process.env.S3_ENDPOINT,
@@ -257,8 +286,13 @@ const mediaAccess = async (req, res) => {
     try {
         console.log("mediaAccess receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
-            console.error("/media/access: Unauthorized user")
-            return res.status(200).send({ error: true, message: "Unauthourized user" });
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/media/access: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
         }
         
         const mediaid = req.params.mediaid;
@@ -302,8 +336,13 @@ const collectionList = async (req, res) => {
     try {
         console.log("collectionList receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
-            console.error("/collection/list: Unauthorized user")
-            return res.status(200).send({ error: true, message: "Unauthourized user" });
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/collection/list: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
         }
         
         let response = Array<document>();
@@ -322,8 +361,13 @@ const collectionCreate = async (req, res) => {
     try {
         console.log("collectionCreate receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
-            console.error("/collection/create: Unauthorized user")
-            return res.status(200).send({ error: true, message: "Unauthourized user" });
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/collection/create: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
         }
         
         const { name } = req.body;
@@ -357,8 +401,13 @@ const collectionDelete = async (req, res) => {
     try {
         console.log("collectionDelete receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
-            console.error("/collection/delete: Unauthorized user")
-            return res.status(200).send({ error: true, message: "Unauthourized user" });
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/collection/delete: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
         }
         
         const { id } = req.body;
@@ -372,11 +421,13 @@ const collectionDelete = async (req, res) => {
             if (index !== -1)
                 recentDocument.splice(index, 1);
             // TODO: delete ydoc and disconnect all clients
-            const ydoc = ydocs.get(doc._id.toString());
-            if (!ydoc) {
-                console.error("/api/delete: Fail to find document with id from map: " + id)
-                return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-            }
+            // const ydoc = ydocs.get(doc._id.toString());
+            // if (!ydoc) {
+            //     console.error("/api/delete: Fail to find document with id from map: " + id)
+            //     return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+            // }
+
+            // ydocs.delete(doc._id.toString());
             return res.status(200).send({});
         }
         else {
@@ -391,13 +442,17 @@ const collectionDelete = async (req, res) => {
 }
 
 
-
 const connect = async (req, res) => {
     try {
         console.log("apiConnect receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
-            console.error("/api/connect: Unauthorized user")
-            return res.status(200).send({ error: true, message: "Unauthourized user" });
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/api/connect: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
         }
 
         const id = req.params.id
@@ -463,8 +518,13 @@ const op = async (req, res) => {
     try {
         console.log("apiOP receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
-            console.error("/api/op: Unauthorized user")
-            return res.status(200).send({ error: true, message: "Unauthourized user" });
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/api/op: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
         }
 
         const update: string = req.body.update;
@@ -508,9 +568,15 @@ const presence = async (req, res) => {
     try {
         console.log("apiPresence receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
-            console.error("/api/presence: Unauthorized user")
-            return res.status(200).send({ error: true, message: "Unauthourized user" });
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/api/presence: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
         }
+
         const clientId = req.session.session_id
 
         const { index, length } = req.body;
