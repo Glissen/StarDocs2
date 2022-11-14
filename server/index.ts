@@ -365,7 +365,7 @@ const mediaAccess = async (req, res) => {
             Key: mediaid,
         }
 
-        s3.getObject(params, (error, data) => {
+        s3.getObject(params, async (error, data) => {
             if (error) {
                 console.log(error);
                 return res.status(200).send({ error: true, message: "fail to get image" });
@@ -373,7 +373,8 @@ const mediaAccess = async (req, res) => {
             else {
                 console.log("Media Retrieved");
                 console.log(data);
-                const contentType = data.ContentType;
+                const mime = await Mime.findOne({ mediaid: mediaid });
+                const contentType = mime.mimeType;
                 res.set({ 'Content-Type': contentType });
                 return res.status(200).send(data.Body);
             }
@@ -695,6 +696,11 @@ app.post('/media/upload', uploadS3.single("file"), async (req, res) => {
         req.session.name = user.name;
     }
 
+    const mime = new Mime({
+        mimeType: req.file.mimetype,
+        mediaid: req.file.key,
+    })
+    await mime.save();
 
     return res.status(200).send({ mediaid: req.file.key });
 });
