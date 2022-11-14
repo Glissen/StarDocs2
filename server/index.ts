@@ -373,16 +373,7 @@ const mediaAccess = async (req, res) => {
                 console.log("Media Retrieved");
                 const contentType = data.ContentType;
                 res.set({ 'Content-Type': contentType });
-
-                const buf = Buffer.from(data.Body.toString(), "binary");
-
-                const aBuf = new ArrayBuffer(buf.length);
-                const temp = new Uint8Array(aBuf);
-                for (let i = 0; i < buf.length; i++) {
-                    temp[i] = buf[i];
-                }
-                const file = new File([aBuf], "file", { type: contentType });
-                return res.status(200).send(file);
+                return res.status(200).send(data.Body);
             }
         })
     }
