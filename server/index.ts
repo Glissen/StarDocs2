@@ -26,6 +26,8 @@ const port: number = parseInt(process.env.EXPRESS_PORT);
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw({
     type: ['image/png', 'image/jpeg'],
     limit: '10mb'
@@ -260,7 +262,7 @@ const mediaUpload = async (req, res) => {
         }
         
         let file = req.body;
-        console.log(req);
+        console.log(req.body);
         file = await fileToBinary(file);
         console.log(file);
         const contentType = req.header('content-type');
