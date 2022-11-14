@@ -17,6 +17,7 @@ export default function Home() {
             if (response.status === 200 && !response.data.error) {
                 console.log(response.data);
                 setDocuments(response.data);
+                setLoggedIn(true);
             }
             else {
                 setLoggedIn(false);
@@ -43,6 +44,7 @@ export default function Home() {
 
         if (response.status === 200 && !response.data.error) {
             document.getElementById("label").innerHTML = "Document Created";
+            window.location.reload();
         }
         else {
             console.error("/collection/create error");
@@ -56,6 +58,7 @@ export default function Home() {
 
         if (response.status === 200 && !response.data.error) {
             console.log("/collection/delete success");
+            window.location.reload();
         }
         else {
             console.error("/collection/delete error");
@@ -66,6 +69,7 @@ export default function Home() {
         const response = await api.post('/users/logout');
         if (response.status === 200 && !response.data.error) {
             setLoggedIn(false);
+            window.location.reload();
         }
         else {
             console.error("/users/logout error");

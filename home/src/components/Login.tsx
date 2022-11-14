@@ -15,7 +15,7 @@ export default function Login(props: {setLoggedIn: Function}) {
         })
 
         if (response.status === 200) {
-            props.setLoggedIn(true);
+            window.location.reload();
         }
         else {
             console.error("/users/login error")

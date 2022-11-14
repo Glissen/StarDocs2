@@ -28,6 +28,7 @@ function App() {
       eventSource.addEventListener('update', (e) => {
         let temp: string = e.data;
         const content = Uint8Array.from(temp.split(',').map(x => parseInt(x, 10)));
+        console.log(content);
         Y.applyUpdate(doc, content);
       })
       // eventSource.addEventListener('presence', (e) => {
