@@ -601,7 +601,7 @@ const op = async (req, res) => {
             addToRecent({ name: doc.name, id: doc._id })
             ydoc.clients.forEach((client, key) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
-                console.log("Sending update to client " + key)
+                //console.log("Sending update to client " + key)
             });
         }
         else {
