@@ -268,6 +268,7 @@ const mediaUpload = async (req, res) => {
         
         let file = req.body;
         console.log(req.body);
+        console.log(file.toString())
         file = await fileToBinary(file);
         console.log(file);
         const contentType = req.header('content-type');
