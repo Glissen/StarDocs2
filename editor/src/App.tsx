@@ -2,7 +2,6 @@ import './App.css';
 import { useEffect, useState } from 'react';
 import Editor from './components/Editor';
 import * as Y from 'yjs'
-import { toUint8Array } from 'js-base64';
 
 function App() {
   const [connecting, setConnecting] = useState(true);
@@ -21,12 +20,14 @@ function App() {
         setConnecting(false);
       }
       eventSource.addEventListener('sync', (e) => {
-        const content = toUint8Array(e.data);
+        let temp: string = e.data;
+        const content = Uint8Array.from(temp.split(',').map(x => parseInt(x, 10)));
         console.log(content);
         Y.applyUpdate(doc, content);
       })
       eventSource.addEventListener('update', (e) => {
-        const content = toUint8Array(e.data);
+        let temp: string = e.data;
+        const content = Uint8Array.from(temp.split(',').map(x => parseInt(x, 10)));
         Y.applyUpdate(doc, content);
       })
       // eventSource.addEventListener('presence', (e) => {
