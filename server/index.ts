@@ -19,7 +19,6 @@ import mongoose, { ObjectId } from 'mongoose'
 
 const multer = require('multer')
 const multerS3 = require('multer-s3')
-let upload = multer()
 
 import * as Y from 'yjs';
 
@@ -31,8 +30,7 @@ const port: number = parseInt(process.env.EXPRESS_PORT);
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded());
 // app.use(upload.array())
 // app.use(express.static('public'));
 app.use(bodyParser.raw({
