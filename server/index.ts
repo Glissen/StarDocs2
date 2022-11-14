@@ -17,6 +17,7 @@ import Document from './models/document-model';
 import mongoose, { ObjectId } from 'mongoose'
 
 const multer = require('multer')
+const multerS3 = require('multer-s3')
 let upload = multer()
 
 import * as Y from 'yjs';
@@ -252,6 +253,22 @@ const fileToBinary = (file) => {
         return data;
     })
 }
+
+const s3 = new S3({
+    endpoint: process.env.S3_ENDPOINT,
+    accessKeyId: process.env.S3_ACCESSKEYID,
+    secretAccessKey: process.env.S3_SECRETACCESSKEY,
+    sslEnabled: true
+});
+
+const uploadS3 = multer({
+    storage: multerS3({
+      s3: s3,
+      acl: 'public-read',
+      bucket: 'images',
+      key: "abc"
+    })
+  });
 
 const mediaUpload = async (req, res) => {
     try {
@@ -671,7 +688,7 @@ app.post('/api/connect/:id', connect);
 app.post('/api/op/:id', op);
 app.post('/api/presence/:id', presence)
 
-app.post('/media/upload', upload.single("file"), mediaUpload);
+app.post('/media/upload', uploadS3.single("file"), (req, res) => { console.log(req.file) });
 app.get('/media/access/:mediaid', mediaAccess);
 
 app.post("/users/signup", signup)
