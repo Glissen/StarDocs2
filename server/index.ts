@@ -224,6 +224,17 @@ const verify = async (req, res) => {
     }
 }
 
+const fileToBinary = async(file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.addEventListener("load", () => resolve(reader.result));
+        reader.addEventListener("error", err => reject(err));
+
+        reader.readAsArrayBuffer(file);
+    });
+}
+
 const mediaUpload = async (req, res) => {
     try {
         console.log("mediaUpload receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
@@ -237,7 +248,9 @@ const mediaUpload = async (req, res) => {
             req.session.name = user.name;
         }
         
-        const file = req.body;
+        let file = req.body;
+        file = await fileToBinary(file);
+        console.log(file);
         const contentType = req.header('content-type');
         console.log("mediaUpload receive file: contentType: " + contentType);
         console.log("file: " + file.toString())
@@ -322,7 +335,8 @@ const mediaAccess = async (req, res) => {
                 console.log("Media Retrieved");
                 const contentType = data.ContentType;
                 res.set({ 'Content-Type': contentType });
-                return res.status(200).send(data.Body);
+                const file = new File(data.body, "file");
+                return res.status(200).send(file);
             }
         })
     }
