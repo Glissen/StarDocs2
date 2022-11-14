@@ -27,7 +27,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.raw({
     type: ['image/png', 'image/jpeg'],
     limit: '10mb'
