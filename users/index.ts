@@ -110,7 +110,8 @@ const logout = async (req, res) => {
     try {
         console.log("/users/logout: User successfully logged out")
         return await res.cookie("token", "", {
-            httpOnly: true
+            httpOnly: true,
+            
         }).status(200).send({});
     }
     catch (e) {
@@ -145,7 +146,7 @@ const verify = async (req, res) => {
         await user.save();
 
         console.log("/users/verify: New user successfully verified")
-        return res.status(200).send({});
+        return res.status(200).send({status: 'OK'});
     }
     catch (err) {
         console.error("/users/verify: New user verification failed: " + err);

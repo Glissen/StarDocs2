@@ -7,7 +7,7 @@ import dotenv from 'dotenv'
 import * as Y from 'yjs';
 import axios from 'axios'
 
-import Document from './models/document-model'; './models/document-model'
+import Document from './models/document-model';
 import db from './db'
 import mongoose, { ObjectId } from 'mongoose'
 
@@ -171,155 +171,174 @@ const collectionDelete = async (req, res) => {
 
 
 const connect = async (req, res) => {
-    if (!req.session.session_id)
-        req.session.session_id = makeId();
-    const cookie = req.cookies.token;
-    const user = await verify(cookie);
-    if (!user.name || !user.id) {
-        console.error("/collection/create: Unauthorized user")
-        return res.status(200).send({ error: true, message: "Unauthourized user" });
-    }
-
-    const id = req.params.id
-
-    if (!id) {
-        console.error("/api/connect: Missing document id")
-        return res.status(200).send({ error: true, message: "Missing document id" });
-    }
-    const doc = await Document.findById({ _id: id });
-    if (!doc) {
-        console.error("/api/connect: Fail to find document with id: " + id)
-        return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-    }
-
-    const ydoc = ydocs.get(doc._id.toString());
-    if (!ydoc) {
-        console.error("/api/connect: Fail to find document with id: " + id)
-        return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-    }
-
-    const headers = {
-        'Content-Type': 'text/event-stream',
-        'Connection': 'keep-alive',
-        'Cache-Control': 'no-cache'
-    };
-    res.writeHead(200, headers);
-
-    const clientId: string = req.session.session_id
-    ydoc.clients.set(clientId, {
-        name: user.name,
-        cursor: {},
-        response: res
-    });
-    console.log("Connecting client " + clientId + " to doc " + id)
-
-    res.write("event: sync\ndata: " + Y.encodeStateAsUpdate(ydoc.doc).toString() + "\n\n")
-
-    ydoc.clients.forEach((client, key) => {
-        if (key !== clientId) {
-            res.write("event: presence\ndata: " + JSON.stringify({ session: key, name: client.name, cursor: client.cursor }))
+    try {
+        console.log("/api/connect: calling connect")
+        if (!req.session.session_id)
+            req.session.session_id = makeId();
+        const cookie = req.cookies.token;
+        const user = await verify(cookie);
+        if (!user.name || !user.id) {
+            console.error("/collection/create: Unauthorized user")
+            return res.status(200).send({ error: true, message: "Unauthourized user" });
         }
-        client.response.write("event: presence\ndata: " + JSON.stringify({ session: clientId, name: user.name, cursor: {} }))
-    })
 
-    res.on('close', () => {
-        console.log(`${clientId} Connection closed`);
-        let tempdoc = ydocs.get(doc._id.toString());
-        if (tempdoc) {
-            tempdoc.clients.delete(clientId)
-            tempdoc.clients.forEach((client) => {
-                client.response.write("event: presence\ndata: " + JSON.stringify({ session_id: clientId, name: user.name, cursor: {} }) + "\n\n");
-            })
+        const id = req.params.id
+
+        if (!id) {
+            console.error("/api/connect: Missing document id")
+            return res.status(200).send({ error: true, message: "Missing document id" });
         }
-    });
+        const doc = await Document.findById({ _id: id });
+        if (!doc) {
+            console.error("/api/connect: Fail to find document with id: " + id)
+            return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+        }
+
+        const ydoc = ydocs.get(doc._id.toString());
+        if (!ydoc) {
+            console.error("/api/connect: Fail to find document with id: " + id)
+            return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+        }
+
+        const headers = {
+            'Content-Type': 'text/event-stream',
+            'Connection': 'keep-alive',
+            'Cache-Control': 'no-cache'
+        };
+        res.writeHead(200, headers);
+
+        const clientId: string = req.session.session_id
+        ydoc.clients.set(clientId, {
+            name: user.name,
+            cursor: {},
+            response: res
+        });
+        console.log("Connecting client " + clientId + " to doc " + id)
+
+        res.write("event: sync\ndata: " + Y.encodeStateAsUpdate(ydoc.doc).toString() + "\n\n")
+
+        ydoc.clients.forEach((client, key) => {
+            if (key !== clientId) {
+                res.write("event: presence\ndata: " + JSON.stringify({ session: key, name: client.name, cursor: client.cursor }))
+            }
+            client.response.write("event: presence\ndata: " + JSON.stringify({ session: clientId, name: user.name, cursor: {} }))
+        })
+
+        res.on('close', () => {
+            console.log(`${clientId} Connection closed`);
+            let tempdoc = ydocs.get(doc._id.toString());
+            if (tempdoc) {
+                tempdoc.clients.delete(clientId)
+                tempdoc.clients.forEach((client) => {
+                    client.response.write("event: presence\ndata: " + JSON.stringify({ session_id: clientId, name: user.name, cursor: {} }) + "\n\n");
+                })
+            }
+        });
+    }
+    catch (err) {
+        console.error("/api/connect: Error occurred: " + err);
+        return res.status(200).send({ error: true, message: "An error has occurred" });
+    }
 }
 
 const op = async (req, res) => {
-    if (!req.session.session_id)
-        req.session.session_id = makeId();
-    const cookie = req.cookies.token;
-    const user = await verify(cookie);
-    if (!user.name || !user.id) {
-        console.error("/api/op: Unauthorized user")
-        return res.status(200).send({ error: true, message: "Unauthourized user" });
-    }
-    const update: string = req.body.update;
-    const id: string = req.params.id;
-    if (!id) {
-        console.error("/api/op: Missing document id")
-        return res.status(200).send({ error: true, message: "Missing document id" });
-    }
-    const doc = await Document.findById({ _id: id });
-    if (!doc) {
-        console.error("/api/op: Fail to find document with id: " + id)
-        return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-    }
+    try {
+        if (!req.session.session_id)
+            req.session.session_id = makeId();
+        const cookie = req.cookies.token;
+        const user = await verify(cookie);
+        if (!user.name || !user.id) {
+            console.error("/api/op: Unauthorized user")
+            return res.status(200).send({ error: true, message: "Unauthourized user" });
+        }
+        const update: string = req.body.update;
+        const id: string = req.params.id;
+        if (!id) {
+            console.error("/api/op: Missing document id")
+            return res.status(200).send({ error: true, message: "Missing document id" });
+        }
+        const doc = await Document.findById({ _id: id });
+        if (!doc) {
+            console.error("/api/op: Fail to find document with id: " + id)
+            return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+        }
 
-    console.log("Doc " + id + " receives Update: " + update)
-    const ydoc = ydocs.get(doc._id.toString());
-    if (ydoc) {
-        console.log("Found doc " + id)
-        console.log("Text before update: " + ydoc.doc.getText().toString())
-        Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
-        console.log("Text after update: " + ydoc.doc.getText().toString())
-        addToRecent({ name: doc.name, id: doc._id })
-        ydoc.clients.forEach((client, key) => {
-            client.response.write("event: update\ndata: " + update + "\n\n");
-            console.log("Sending update to client " + key)
-        });
+        console.log("Doc " + id + " receives Update: " + update)
+        const ydoc = ydocs.get(doc._id.toString());
+        if (ydoc) {
+            console.log("Found doc " + id)
+            console.log("Text before update: " + ydoc.doc.getText().toString())
+            Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
+            console.log("Text after update: " + ydoc.doc.getText().toString())
+            addToRecent({ name: doc.name, id: doc._id })
+            ydoc.clients.forEach((client, key) => {
+                client.response.write("event: update\ndata: " + update + "\n\n");
+                console.log("Sending update to client " + key)
+            });
+        }
+        else {
+            console.log("Fail to find doc " + id)
+            return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+        }
+        res.send({});
     }
-    else {
-        console.log("Fail to find doc " + id)
-        return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+    catch (err) {
+        console.error("/api/op: Error occurred: " + err);
+        return res.status(200).send({ error: true, message: "An error has occurred" });
     }
-    res.send({});
 }
 
 const presence = async (req, res) => {
-    if (!req.session.session_id)
-        req.session.session_id = makeId();
-    const clientId = req.session.session_id;
-    const cookie = req.cookies.token;
-    const user = await verify(cookie);
-    if (!user.name || !user.id) {
-        console.error("/api/presence: Unauthorized user")
-        return res.status(200).send({ error: true, message: "Unauthourized user" });
-    }
-    const { index, length } = req.body;
-    if (index === undefined || index === null || length === undefined || length === null) {
-        console.error("/api/presence: Missing parameter")
-        res.status(200).json({ error: true, message: "Missing parameter" });
-    }
-    const id: string = req.params.id;
-    if (!id) {
-        console.error("/api/presence: Missing document id")
-        return res.status(200).send({ error: true, message: "Missing document id" });
-    }
-    const doc = await Document.findById({ _id: id });
-    if (!doc) {
-        console.error("/api/presence: Fail to find document with id: " + id)
-        return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-    }
-
-    const ydoc = ydocs.get(doc._id.toString());
-    if (ydoc) {
-        console.log("Found doc " + id)
-        const tmpclient = ydoc.clients.get(clientId)
-        if (!tmpclient) {
-            console.error("/api/presence: Fail to find client with id: " + clientId)
-            return res.status(200).send({ error: true, message: "Fail to find client with id: " + clientId });
+    try {
+        if (!req.session.session_id)
+            req.session.session_id = makeId();
+        const clientId = req.session.session_id;
+        const cookie = req.cookies.token;
+        const user = await verify(cookie);
+        if (!user.name || !user.id) {
+            console.error("/api/presence: Unauthorized user")
+            return res.status(200).send({ error: true, message: "Unauthourized user" });
         }
-        tmpclient.cursor = {index: index, length: length}
-        ydoc.clients.forEach((client, key) => {
-            client.response.write("event: presence\ndata: " + JSON.stringify({ session_id: clientId, name: tmpclient.name, cursor: tmpclient.cursor }) + "\n\n");
-            console.log("Sending presence to client " + key)
-        });
+        const { index, length } = req.body;
+        if (index === undefined || index === null || length === undefined || length === null) {
+            console.error("/api/presence: Missing parameter")
+            res.status(200).json({ error: true, message: "Missing parameter" });
+        }
+        const id: string = req.params.id;
+        if (!id) {
+            console.error("/api/presence: Missing document id")
+            return res.status(200).send({ error: true, message: "Missing document id" });
+        }
+        const doc = await Document.findById({ _id: id });
+        if (!doc) {
+            console.error("/api/presence: Fail to find document with id: " + id)
+            return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+        }
+
+        const ydoc = ydocs.get(doc._id.toString());
+        if (ydoc) {
+            console.log("Found doc " + id)
+            const tmpclient = ydoc.clients.get(clientId)
+            if (!tmpclient) {
+                console.error("/api/presence: Fail to find client with id: " + clientId)
+                return res.status(200).send({ error: true, message: "Fail to find client with id: " + clientId });
+            }
+            tmpclient.cursor = { index: index, length: length }
+            ydoc.clients.forEach((client, key) => {
+                client.response.write("event: presence\ndata: " + JSON.stringify({ session_id: clientId, name: tmpclient.name, cursor: tmpclient.cursor }) + "\n\n");
+                console.log("Sending presence to client " + key)
+            });
+        }
+        else {
+            console.log("Fail to find doc " + id)
+            return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+        }
+        res.send({});
     }
-    else {
-        console.log("Fail to find doc " + id)
-        return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
+    catch (err) {
+        console.error("/api/presence: Error occurred: " + err);
+        return res.status(200).send({ error: true, message: "An error has occurred" });
     }
-    res.send({});
 }
 app.post('/collection/create', collectionCreate);
 app.post('/collection/delete', collectionDelete);
