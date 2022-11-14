@@ -145,7 +145,7 @@ const verify = async (req, res) => {
         await user.save();
 
         console.log("/users/verify: New user successfully verified")
-        return res.status(200).send({});
+        return res.status(200).send({status: 'OK'});
     }
     catch (err) {
         console.error("/users/verify: New user verification failed: " + err);
