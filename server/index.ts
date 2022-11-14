@@ -31,8 +31,8 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(express.urlencoded({ extended: true }));
-app.use(upload.array())
-app.use(express.static('public'));
+// app.use(upload.array())
+// app.use(express.static('public'));
 app.use(bodyParser.raw({
     type: ['image/png', 'image/jpeg'],
     limit: '10mb'
@@ -671,7 +671,7 @@ app.post('/api/connect/:id', connect);
 app.post('/api/op/:id', op);
 app.post('/api/presence/:id', presence)
 
-app.post('/media/upload', mediaUpload);
+app.post('/media/upload', upload.fields([]), mediaUpload);
 app.get('/media/access/:mediaid', mediaAccess);
 
 app.post("/users/signup", signup)
