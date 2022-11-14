@@ -671,7 +671,7 @@ app.post('/api/connect/:id', connect);
 app.post('/api/op/:id', op);
 app.post('/api/presence/:id', presence)
 
-app.post('/media/upload', upload.fields([]), mediaUpload);
+app.post('/media/upload', upload.single("file"), mediaUpload);
 app.get('/media/access/:mediaid', mediaAccess);
 
 app.post("/users/signup", signup)
