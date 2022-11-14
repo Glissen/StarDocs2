@@ -335,7 +335,7 @@ const mediaAccess = async (req, res) => {
                 console.log("Media Retrieved");
                 const contentType = data.ContentType;
                 res.set({ 'Content-Type': contentType });
-                const file = new File(data.body, "file");
+                const file = new File(data.Body, "file");
                 return res.status(200).send(file);
             }
         })
