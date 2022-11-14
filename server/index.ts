@@ -700,9 +700,8 @@ app.post('/media/upload', uploadS3.single("file"), async (req, res) => {
         }
         req.session.session_id = makeId();
         req.session.name = user.name;
-
-        return res.status(200).send({ mediaid: req.file.key });
     }
+    return res.status(200).send({ mediaid: req.file.key });
 });
 app.get('/media/access/:mediaid', mediaAccess);
 
