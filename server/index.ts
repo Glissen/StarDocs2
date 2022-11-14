@@ -8,6 +8,7 @@ import db from './db'
 import sendEmail from './mail'
 import User from './models/user-model'
 import Token from './models/token-model'
+import Mime from './models/mime-model';
 import auth from './auth';
 
 import S3 from 'aws-sdk/clients/s3'
@@ -371,6 +372,7 @@ const mediaAccess = async (req, res) => {
             }
             else {
                 console.log("Media Retrieved");
+                console.log(data);
                 const contentType = data.ContentType;
                 res.set({ 'Content-Type': contentType });
                 return res.status(200).send(data.Body);
@@ -692,6 +694,8 @@ app.post('/media/upload', uploadS3.single("file"), async (req, res) => {
         req.session.session_id = makeId();
         req.session.name = user.name;
     }
+
+
     return res.status(200).send({ mediaid: req.file.key });
 });
 app.get('/media/access/:mediaid', mediaAccess);
