@@ -10,7 +10,7 @@ export default function Editor(props: {id: any, doc: any}) {
     let ref : any = null;
     useEffect(() => {
         editor = ref.getEditor();
-        const content = props.doc.getText('quill');
+        const content = props.doc.getText();
         new QuillBinding(content, editor);
         props.doc.on('update', async(update: any) => {
             await axios.post(`http://duolcpu.cse356.compas.cs.stonybrook.edu/api/op/${props.id}`, {
