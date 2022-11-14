@@ -694,6 +694,10 @@ app.post('/media/upload', uploadS3.single("file"), async (req, res) => {
         req.session.name = user.name;
     }
 
+    if (req.file.mimetype !== "image/png" && req.file.mimetype !== "image/jpeg") {
+        return res.status(200).send({ error: true, message: "whatever" });
+    }
+
     const mime = new Mime({
         mimeType: req.file.mimetype,
         mediaid: req.file.key,
