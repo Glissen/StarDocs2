@@ -240,7 +240,7 @@ const mediaUpload = async (req, res) => {
         const file = req.body;
         const contentType = req.header('content-type');
         console.log("mediaUpload receive file: contentType: " + contentType);
-        console.log("file: " + file)
+        console.log("file: " + JSON.stringify(file))
         if (!file) {
             return res.status(200).send({ error: true, message: "Missing file" });
         }
