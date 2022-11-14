@@ -49,6 +49,9 @@ const ydocs: Map<string, ydoc> = new Map();
 
 const addToRecent = (document: document): void => {
     const index = recentDocument.findIndex((element) => { return element.id.toHexString() === document.id.toHexString() });
+    if (index === 0) {
+        return
+    }
     if (index !== -1)
         recentDocument.splice(index, 1);
     recentDocument.splice(0, 0, document);
