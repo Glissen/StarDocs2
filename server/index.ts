@@ -149,59 +149,29 @@ const elasticUpdateDoc = async(name: string, text: string, id: string) => {
     return result;
 }
 
-const elasticSearch = async(phrase) => {
-    // const result = await elasticClient.search({
-    //     index: 'docs',
-    //     query: {
-    //         match: {
-    //             content: word
-    //         }
-    //     },
-    //     highlight: {
-    //         fields: {
-    //             content: {}
-    //         }
-    //     },
-    //     from: 0,
-    //     size: 10
-    // });
+const elasticSearch = async(query: string) => {
     const result = await elasticClient.search({
         index: 'docs',
         query: {
-            bool: {
-                should: [
-                    {
-                        match: {
-                            content: {
-                                query: phrase
-                            }
-                        }
-                    },
-                    {
-                        match: {
-                            content: {
-                                query: phrase,
-                                operator: "and"
-                            }
-                        }
-                    },
-                    {
-                        match_phrase: {
-                            content: {
-                                query: phrase
-                            }   
-                        }
-                    }
+            multi_match: {
+                query: query,
+                fields: [
+                    "name",
+                    "content"
                 ]
             }
         },
         highlight: {
             fields: {
+                name: {},
                 content: {}
             }
         },
         from: 0,
-        size: 10
+        size: 10,
+        _source: [
+            "name"
+        ]
     })
     return result;
 }
@@ -849,8 +819,34 @@ const presence = async (req, res) => {
     }
 }
 
+const search = async (req, res) => {
+    try {
+        console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        if (!req.session.session_id) {
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/index/search: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
+        }
 
-// app.get('/index/search', search);
+        const { q } = req.query;
+
+        const result = await elasticSearch(q);
+
+        console.log(result);
+        res.send(result);
+    }
+    catch (err) {
+        console.error("/api/presence: Error occurred: " + err);
+        return res.status(200).send({ error: true, message: "An error has occurred" });
+    }
+}
+
+
+app.get('/index/search', search);
 // app.get('/index/suggest', suggest);
 
 app.post('/collection/create', collectionCreate);
