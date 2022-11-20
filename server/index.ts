@@ -176,7 +176,9 @@ const elasticSearch = async(phrase) => {
                     }
                 ]
             }
-        }
+        },
+        from: 0,
+        size: 10
     })
     return result;
 }
