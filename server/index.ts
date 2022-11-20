@@ -74,14 +74,47 @@ const elasticClient = new Client({
 })
 
 const elasticCreateIndex = async(doc: ydoc, id: string) => {
-    const result = await elasticClient.index({
+    // const result = await elasticClient.index({
+    //     index: 'docs',
+    //     id: id,
+    //     document: {
+    //         name: doc.name,
+    //         content: ""
+    //     },
+    //     refresh: true
+    // })
+
+    const result = await elasticClient.indices.create({
         index: 'docs',
-        id: id,
-        document: {
-            name: doc.name,
-            content: ""
+        settings: {
+            analysis: {
+                analyzer: {
+                    text_analyzer: {
+                        type: "custom",
+                        tokenizer: "standard",
+                        filter: [
+                            "lowercase",
+                            "english_stop",
+                            "porter_stem",
+                        ]
+                    }
+                },
+                filter: {
+                    english_stop: {
+                        type: "stop",
+                        stopwords: "_english_",
+                    }
+                }
+            }
         },
-        refresh: true
+        mappings: {
+            properties: {
+                content: { 
+                    type: "text",
+                    search_analyzer: "text_analyzer"
+                }
+            }
+        }
     })
     await elasticClient.indices.refresh({ index: 'docs' })
     return result;
@@ -91,31 +124,62 @@ const elasticUpdateIndex = async(text: string, id: string) => {
     const result = await elasticClient.index({         // should auto create index or document if not exist?
         index: 'docs',                  // also need to add stop filter settings
         id: id,
-        document: {
-            content: text
-        },
+        content: text,
         refresh: true,      // true || 'wait_for'
     });
-    await elasticClient.indices.refresh({ index: 'docs' })
+    //await elasticClient.indices.refresh({ index: 'docs' })
     return result;
 }
 
-const elasticSearch = async(word) => {
+const elasticSearch = async(phrase) => {
+    // const result = await elasticClient.search({
+    //     index: 'docs',
+    //     query: {
+    //         match: {
+    //             content: word
+    //         }
+    //     },
+    //     highlight: {
+    //         fields: {
+    //             content: {}
+    //         }
+    //     },
+    //     from: 0,
+    //     size: 10
+    // });
     const result = await elasticClient.search({
         index: 'docs',
         query: {
-            match: {
-                content: word
-            }
-        },
-        highlight: {
-            fields: {
-                content: {}
+            bool: {
+                should: [
+                    {
+                        match: {
+                            content: {
+                                query: phrase
+                            }
+                        }
+                    },
+                    {
+                        match: {
+                            content: {
+                                query: phrase,
+                                operator: "and"
+                            }
+                        }
+                    },
+                    {
+                        match_phrase: {
+                            content: {
+                                query: phrase
+                            }   
+                        }
+                    }
+                ]
             }
         },
         from: 0,
         size: 10
-    });
+    })
     return result;
 }
 
