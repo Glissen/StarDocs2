@@ -614,7 +614,7 @@ const collectionCreate = async (req, res) => {
         return res.status(200).send({ id: id })
     }
     catch (err) {
-        console.error("/collection/list: Error occurred: " + err);
+        console.error("/collection/create: Error occurred: " + err);
         return res.status(200).send({ error: true, message: "An error has occurred" });
     }
 }
