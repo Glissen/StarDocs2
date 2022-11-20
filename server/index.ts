@@ -836,8 +836,16 @@ const search = async (req, res) => {
 
         const result = await elasticSearch(q);
 
-        console.log(result);
-        res.send(result);
+        const size = result.hits.hits.length;
+        let ans = new Array(size);
+
+        for (let index = 0; index < size; index++) {
+            const element = result.hits.hits[index];
+            const hl = element.highlight.name ? element.highlight.name : element.highlight.content;
+            ans[index] = {docid: element._id, name: element._source.name, snippet: hl};
+        }
+
+        res.status(200).send(ans);
     }
     catch (err) {
         console.error("/api/presence: Error occurred: " + err);
