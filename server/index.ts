@@ -526,7 +526,9 @@ const collectionCreate = async (req, res) => {
             clients: new Map(),
             cursors: new Map()
         };
-        ydocs.set(id.toString(), ydoc)
+        ydocs.set(id, ydoc)
+        await elasticCreateIndex(ydoc, id);
+        // TODO: check error
         return res.status(200).send({ id: id })
     }
     catch (err) {
@@ -678,6 +680,10 @@ const op = async (req, res) => {
             // console.log("Text before update: " + ydoc.doc.getText().toString())
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
+
+            await elasticUpdateIndex(ydoc.doc.getText(), id);
+            // TODO: check error
+
             addToRecent({ name: ydoc.name, id: id })
             return ydoc.clients.forEach((client, key) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
@@ -756,6 +762,8 @@ const presence = async (req, res) => {
 }
 
 
+// app.get('/index/search', search);
+// app.get('/index/suggest', suggest);
 
 app.post('/collection/create', collectionCreate);
 app.post('/collection/delete', collectionDelete);
