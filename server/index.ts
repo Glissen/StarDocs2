@@ -841,7 +841,7 @@ const search = async (req, res) => {
 
         for (let index = 0; index < size; index++) {
             const element = result.hits.hits[index];
-            const hl = element.highlight.name ? element.highlight.name : element.highlight.content;
+            const hl = element.highlight.name ? element.highlight.name[0] : element.highlight.content[0];
             ans[index] = {docid: element._id, name: element._source.name, snippet: hl};
         }
 
