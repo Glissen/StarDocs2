@@ -74,14 +74,23 @@ const elasticClient = new Client({
 })
 
 const elasticCreateIndex = async(doc: ydoc, id: string) => {
-    const result = await elasticClient.index({
+    // const result = await elasticClient.index({
+    //     index: 'docs',
+    //     id: id,
+    //     document: {
+    //         name: doc.name,
+    //         content: ""
+    //     },
+    //     refresh: true
+    // })
+
+    const result = await elasticClient.indices.create({
         index: 'docs',
-        id: id,
-        document: {
-            name: doc.name,
-            content: ""
-        },
-        refresh: true
+        mappings: {
+            properties: {
+                content: { type: "text" }
+            }
+        }
     })
     await elasticClient.indices.refresh({ index: 'docs' })
     return result;
@@ -91,12 +100,10 @@ const elasticUpdateIndex = async(text: string, id: string) => {
     const result = await elasticClient.index({         // should auto create index or document if not exist?
         index: 'docs',                  // also need to add stop filter settings
         id: id,
-        document: {
-            content: text
-        },
+        content: text,
         refresh: true,      // true || 'wait_for'
     });
-    await elasticClient.indices.refresh({ index: 'docs' })
+    //await elasticClient.indices.refresh({ index: 'docs' })
     return result;
 }
 
