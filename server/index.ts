@@ -119,7 +119,7 @@ const elasticCreateIndex = async() => {
     await elasticClient.indices.refresh({ index: 'docs' })
     return result;
 }
-elasticCreateIndex();
+//elasticCreateIndex();
 
 const elasticCreateDoc = async(id: string, name: string) => {
     const result = await elasticClient.index({
