@@ -17,16 +17,12 @@ import session from 'express-session';
 
 //import mongoose, { ObjectId } from 'mongoose'
 
-const { Client } = require('@elastic/elasticsearch')
-const elasticClient = new Client({
-    cloud: { id: '' },
-    auth: { apiKey: '' }
-})
 
 const multer = require('multer')
 const multerS3 = require('multer-s3')
 
 import * as Y from 'yjs';
+import { idText } from 'typescript';
 
 const fs = require('fs')
 
@@ -71,6 +67,58 @@ const makeId = () => {
     }
     return ID;
 }
+
+const { Client } = require('@elastic/elasticsearch')
+const elasticClient = new Client({
+    node: 'http://localhost:9200'
+})
+
+const elasticCreateIndex = async(doc: ydoc, id: string) => {
+    const result = await elasticClient.index({
+        index: 'docs',
+        id: id,
+        document: {
+            name: doc.name,
+            content: ""
+        },
+        refresh: true
+    })
+    await elasticClient.indices.refresh({ index: 'docs' })
+    return result;
+}
+
+const elasticUpdateIndex = async(text: string, id: string) => {
+    const result = await elasticClient.index({         // should auto create index or document if not exist?
+        index: 'docs',                  // also need to add stop filter settings
+        id: id,
+        document: {
+            content: text
+        },
+        refresh: true,      // true || 'wait_for'
+    });
+    await elasticClient.indices.refresh({ index: 'docs' })
+    return result;
+}
+
+const elasticSearch = async(word) => {
+    const result = await elasticClient.search({
+        index: 'docs',
+        query: {
+            match: {
+                content: word
+            }
+        },
+        highlight: {
+            fields: {
+                content: {}
+            }
+        },
+        from: 0,
+        size: 10
+    });
+    return result;
+}
+
 
 const getUserNameAndId = async (cookie) => {
     try {
@@ -254,14 +302,14 @@ const verify = async (req, res) => {
 //     });
 // }
 
-const fileToBinary = (file) => {
-    fs.readFile(file, 'utf8', function(error, data) {
-        if (error)
-            return console.error(error);
-        console.log(data);
-        return data;
-    })
-}
+// const fileToBinary = (file) => {
+//     fs.readFile(file, 'utf8', function(error, data) {
+//         if (error)
+//             return console.error(error);
+//         console.log(data);
+//         return data;
+//     })
+// }
 
 const s3 = new S3({
     endpoint: process.env.S3_ENDPOINT,
@@ -281,66 +329,91 @@ const uploadS3 = multer({
     })
   });
 
-const mediaUpload = async (req, res) => {
-    try {
-        console.log("mediaUpload receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
-        if (!req.session.session_id) {
-            const user = await getUserNameAndId(req.cookies.token)
-            if (!user) {
-                console.error("/media/upload: Unauthorized user")
-                return res.status(200).send({ error: true, message: "Unauthourized user" });
-            }
-            req.session.session_id = makeId();
-            req.session.name = user.name;
-        }
+// const mediaUpload = async (req, res) => {
+//     try {
+//         console.log("mediaUpload receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+//         if (!req.session.session_id) {
+//             const user = await getUserNameAndId(req.cookies.token)
+//             if (!user) {
+//                 console.error("/media/upload: Unauthorized user")
+//                 return res.status(200).send({ error: true, message: "Unauthourized user" });
+//             }
+//             req.session.session_id = makeId();
+//             req.session.name = user.name;
+//         }
         
-        let file = req.body;
-        console.log(req.body);
-        file = await fileToBinary(file);
-        console.log(file);
-        const contentType = req.header('content-type');
-        console.log("mediaUpload receive file: contentType: " + contentType);
-        console.log("file: " + file.toString())
-        if (!file) {
-            return res.status(200).send({ error: true, message: "Missing file" });
+//         let file = req.body;
+//         console.log(req.body);
+//         file = await fileToBinary(file);
+//         console.log(file);
+//         const contentType = req.header('content-type');
+//         console.log("mediaUpload receive file: contentType: " + contentType);
+//         console.log("file: " + file.toString())
+//         if (!file) {
+//             return res.status(200).send({ error: true, message: "Missing file" });
+//         }
+//         // if (contentType !== 'image/jpeg' && contentType !== 'image/png') {
+//         //     return res.status(200).send({ error: true, message: "Only accept jpeg/png file" });
+//         // }
+
+//         const key = makeId()
+
+//         const s3 = new S3({
+//             endpoint: process.env.S3_ENDPOINT,
+//             accessKeyId: process.env.S3_ACCESSKEYID,
+//             secretAccessKey: process.env.S3_SECRETACCESSKEY,
+//             sslEnabled: true
+//         });
+
+//         const params = {
+//             Bucket: "images",
+//             Body: file,
+//             Key: key,
+//             ContentType: contentType
+//         }
+
+//         s3.putObject(params, (error, data) => {
+//             if (error) {
+//                 console.log(error);
+//                 return res.status(200).send({ error: true, message: "Fail to put in" });
+//             }
+//             else {
+//                 console.log("Media stored -- Key: ", key);
+//                 console.log(data);
+//                 return res.status(200).send({ mediaid: key });
+//             }
+//         })
+//     }
+//     catch (err) {
+//         console.error("/media/upload: Error occurred: " + err);
+//         return res.status(200).send({ error: true, message: "An error has occurred" });
+//     }
+
+// }
+
+const mediaUpload = async (req, res) => { 
+    console.log(req.file);
+    if (!req.session.session_id) {
+        const user = await getUserNameAndId(req.cookies.token)
+        if (!user) {
+            console.error("/media/upload: Unauthorized user")
+            return res.status(200).send({ error: true, message: "Unauthourized user" });
         }
-        // if (contentType !== 'image/jpeg' && contentType !== 'image/png') {
-        //     return res.status(200).send({ error: true, message: "Only accept jpeg/png file" });
-        // }
-
-        const key = makeId()
-
-        const s3 = new S3({
-            endpoint: process.env.S3_ENDPOINT,
-            accessKeyId: process.env.S3_ACCESSKEYID,
-            secretAccessKey: process.env.S3_SECRETACCESSKEY,
-            sslEnabled: true
-        });
-
-        const params = {
-            Bucket: "images",
-            Body: file,
-            Key: key,
-            ContentType: contentType
-        }
-
-        s3.putObject(params, (error, data) => {
-            if (error) {
-                console.log(error);
-                return res.status(200).send({ error: true, message: "Fail to put in" });
-            }
-            else {
-                console.log("Media stored -- Key: ", key);
-                console.log(data);
-                return res.status(200).send({ mediaid: key });
-            }
-        })
-    }
-    catch (err) {
-        console.error("/media/upload: Error occurred: " + err);
-        return res.status(200).send({ error: true, message: "An error has occurred" });
+        req.session.session_id = makeId();
+        req.session.name = user.name;
     }
 
+    if (req.file.mimetype !== "image/png" && req.file.mimetype !== "image/jpeg") {
+        return res.status(200).send({ error: true, message: "whatever" });
+    }
+
+    const mime = new Mime({
+        mimeType: req.file.mimetype,
+        mediaid: req.file.key,
+    })
+    await mime.save();
+
+    return res.status(200).send({ mediaid: req.file.key });
 }
 
 const mediaAccess = async (req, res) => {
@@ -572,18 +645,6 @@ const connect = async (req, res) => {
     }
 }
 
-
-const elasticIndex = async(doc) => {
-    await elasticClient.index({         // should auto create index or document if not exist?
-        index: 'docs',                  // also need to add stop filter settings
-        id: doc.id,
-        document: {
-            content: 'doc || doc.something'
-        },
-        refresh: true,      // true || 'wait_for'
-    })
-}
-
 const op = async (req, res) => {
     try {
         console.log("apiOP receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
@@ -694,21 +755,7 @@ const presence = async (req, res) => {
     }
 }
 
-const elasticSearch = async(word) => {
-    const result = await elasticClient.search({
-        index: 'docs',
-        query: {
-            match: {
-                content: word
-            }
-        },
-        highlight: {
-            fields: {
-                content: {}
-            }
-        }
-    })
-}
+
 
 app.post('/collection/create', collectionCreate);
 app.post('/collection/delete', collectionDelete);
@@ -719,30 +766,7 @@ app.post('/api/connect/:id', connect);
 app.post('/api/op/:id', op);
 app.post('/api/presence/:id', presence)
 
-app.post('/media/upload', uploadS3.single("file"), async (req, res) => { 
-    console.log(req.file);
-    if (!req.session.session_id) {
-        const user = await getUserNameAndId(req.cookies.token)
-        if (!user) {
-            console.error("/media/upload: Unauthorized user")
-            return res.status(200).send({ error: true, message: "Unauthourized user" });
-        }
-        req.session.session_id = makeId();
-        req.session.name = user.name;
-    }
-
-    if (req.file.mimetype !== "image/png" && req.file.mimetype !== "image/jpeg") {
-        return res.status(200).send({ error: true, message: "whatever" });
-    }
-
-    const mime = new Mime({
-        mimeType: req.file.mimetype,
-        mediaid: req.file.key,
-    })
-    await mime.save();
-
-    return res.status(200).send({ mediaid: req.file.key });
-});
+app.post('/media/upload', uploadS3.single("file"), mediaUpload);
 app.get('/media/access/:mediaid', mediaAccess);
 
 app.post("/users/signup", signup)
