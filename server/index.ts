@@ -121,25 +121,26 @@ const elasticCreateIndex = async() => {
 }
 //elasticCreateIndex();
 
-const elasticCreateDoc = async(id: string, name: string) => {
-    const result = await elasticClient.index({
-        index: 'docs',                  
-        id: id,
-        document: {
-            name: name,
-            content: '',
-        },
-        refresh: true,      // true || 'wait_for'
-    });
-    //await elasticClient.indices.refresh({ index: 'docs' })
-    return result;
-}
+// const elasticCreateDoc = async(id: string, name: string) => {
+//     const result = await elasticClient.index({
+//         index: 'docs',                  
+//         id: id,
+//         document: {
+//             name: name,
+//             content: '',
+//         },
+//         refresh: true,      // true || 'wait_for'
+//     });
+//     //await elasticClient.indices.refresh({ index: 'docs' })
+//     return result;
+// }
 
-const elasticUpdateDoc = async(text: string, id: string) => {
+const elasticUpdateDoc = async(name: string, text: string, id: string) => {
     const result = await elasticClient.index({
         index: 'docs',
         id: id,
         document: {
+            name: name,
             content: text,
         },
         refresh: true,      // true || 'wait_for'
@@ -609,7 +610,7 @@ const collectionCreate = async (req, res) => {
         };
         ydocs.set(id, ydoc)
         //await elasticCreateIndex(ydoc, id);
-        await elasticCreateDoc(id, name);
+        await elasticUpdateDoc(name, "", id);
         // TODO: check error
         return res.status(200).send({ id: id })
     }
@@ -763,7 +764,7 @@ const op = async (req, res) => {
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
 
-            await elasticUpdateDoc(ydoc.doc.getText(), id);
+            await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
             // TODO: check error
 
             addToRecent({ name: ydoc.name, id: id })
