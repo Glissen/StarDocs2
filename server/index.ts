@@ -15,7 +15,13 @@ import S3 from 'aws-sdk/clients/s3'
 import session from 'express-session';
 // import Document from './models/document-model';
 
-import mongoose, { ObjectId } from 'mongoose'
+//import mongoose, { ObjectId } from 'mongoose'
+
+const { Client } = require('@elastic/elasticsearch')
+const elasticClient = new Client({
+    cloud: { id: '' },
+    auth: { apiKey: '' }
+})
 
 const multer = require('multer')
 const multerS3 = require('multer-s3')
@@ -566,6 +572,18 @@ const connect = async (req, res) => {
     }
 }
 
+
+const elasticIndex = async(doc) => {
+    await elasticClient.index({         // should auto create index or document if not exist?
+        index: 'docs',                  // also need to add stop filter settings
+        id: doc.id,
+        document: {
+            content: 'doc || doc.something'
+        },
+        refresh: true,      // true || 'wait_for'
+    })
+}
+
 const op = async (req, res) => {
     try {
         console.log("apiOP receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
@@ -675,6 +693,23 @@ const presence = async (req, res) => {
         return res.status(200).send({ error: true, message: "An error has occurred" });
     }
 }
+
+const elasticSearch = async(word) => {
+    const result = await elasticClient.search({
+        index: 'docs',
+        query: {
+            match: {
+                content: word
+            }
+        },
+        highlight: {
+            fields: {
+                content: {}
+            }
+        }
+    })
+}
+
 app.post('/collection/create', collectionCreate);
 app.post('/collection/delete', collectionDelete);
 app.get('/collection/list', collectionList);
