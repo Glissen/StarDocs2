@@ -86,9 +86,33 @@ const elasticCreateIndex = async(doc: ydoc, id: string) => {
 
     const result = await elasticClient.indices.create({
         index: 'docs',
+        settings: {
+            analysis: {
+                analyzer: {
+                    text_analyzer: {
+                        type: "custom",
+                        tokenizer: "standard",
+                        filter: [
+                            "lowercase",
+                            "english_stop",
+                            "porter_stem",
+                        ]
+                    }
+                },
+                filter: {
+                    english_stop: {
+                        type: "stop",
+                        stopwords: "_english_",
+                    }
+                }
+            }
+        },
         mappings: {
             properties: {
-                content: { type: "text" }
+                content: { 
+                    type: "text",
+                    search_analyzer: "text_analyzer"
+                }
             }
         }
     })
@@ -107,22 +131,53 @@ const elasticUpdateIndex = async(text: string, id: string) => {
     return result;
 }
 
-const elasticSearch = async(word) => {
+const elasticSearch = async(phrase) => {
+    // const result = await elasticClient.search({
+    //     index: 'docs',
+    //     query: {
+    //         match: {
+    //             content: word
+    //         }
+    //     },
+    //     highlight: {
+    //         fields: {
+    //             content: {}
+    //         }
+    //     },
+    //     from: 0,
+    //     size: 10
+    // });
     const result = await elasticClient.search({
         index: 'docs',
         query: {
-            match: {
-                content: word
+            bool: {
+                should: [
+                    {
+                        match: {
+                            content: {
+                                query: phrase
+                            }
+                        }
+                    },
+                    {
+                        match: {
+                            content: {
+                                query: phrase,
+                                operator: "and"
+                            }
+                        }
+                    },
+                    {
+                        match_phrase: {
+                            content: {
+                                query: phrase
+                            }   
+                        }
+                    }
+                ]
             }
-        },
-        highlight: {
-            fields: {
-                content: {}
-            }
-        },
-        from: 0,
-        size: 10
-    });
+        }
+    })
     return result;
 }
 
