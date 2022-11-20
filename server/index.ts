@@ -73,7 +73,7 @@ const elasticClient = new Client({
     node: 'http://localhost:9200'
 })
 
-const elasticCreateIndex = async(doc: ydoc, id: string) => {
+const elasticCreateIndex = async() => {
     // const result = await elasticClient.index({
     //     index: 'docs',
     //     id: id,
@@ -119,10 +119,23 @@ const elasticCreateIndex = async(doc: ydoc, id: string) => {
     await elasticClient.indices.refresh({ index: 'docs' })
     return result;
 }
+elasticCreateIndex();
 
-const elasticUpdateIndex = async(text: string, id: string) => {
-    const result = await elasticClient.index({         // should auto create index or document if not exist?
-        index: 'docs',                  // also need to add stop filter settings
+const elasticCreateDoc = async(id: string, name: string) => {
+    const result = await elasticClient.index({
+        index: 'docs',                  
+        id: id,
+        name: name,
+        content: '',
+        refresh: true,      // true || 'wait_for'
+    });
+    //await elasticClient.indices.refresh({ index: 'docs' })
+    return result;
+}
+
+const elasticUpdateDoc = async(text: string, id: string) => {
+    const result = await elasticClient.index({
+        index: 'docs',
         id: id,
         content: text,
         refresh: true,      // true || 'wait_for'
@@ -591,7 +604,8 @@ const collectionCreate = async (req, res) => {
             cursors: new Map()
         };
         ydocs.set(id, ydoc)
-        await elasticCreateIndex(ydoc, id);
+        //await elasticCreateIndex(ydoc, id);
+        await elasticCreateDoc(id, name);
         // TODO: check error
         return res.status(200).send({ id: id })
     }
@@ -745,7 +759,7 @@ const op = async (req, res) => {
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
 
-            await elasticUpdateIndex(ydoc.doc.getText(), id);
+            await elasticUpdateDoc(ydoc.doc.getText(), id);
             // TODO: check error
 
             addToRecent({ name: ydoc.name, id: id })
