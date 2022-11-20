@@ -490,7 +490,7 @@ const mediaUpload = async (req, res) => {
         req.session.name = user.name;
     }
 
-    if (req.file.mimetype !== "image/png" && req.file.mimetype !== "image/jpeg") {
+    if (req.file.mimetype !== "image/png" && req.file.mimetype !== "image/jpeg" && req.file.mimetype !== "image/gif") {
         return res.status(200).send({ error: true, message: "whatever" });
     }
 
