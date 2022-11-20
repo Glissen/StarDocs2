@@ -125,8 +125,8 @@ const elasticCreateDoc = async(id: string, name: string) => {
     const result = await elasticClient.index({
         index: 'docs',                  
         id: id,
-        name: name,
         document: {
+            name: name,
             content: '',
         },
         refresh: true,      // true || 'wait_for'
@@ -140,7 +140,7 @@ const elasticUpdateDoc = async(text: string, id: string) => {
         index: 'docs',
         id: id,
         document: {
-            content: text
+            content: text,
         },
         refresh: true,      // true || 'wait_for'
     });
