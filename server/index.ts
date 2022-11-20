@@ -13,18 +13,11 @@ import auth from './auth';
 
 import S3 from 'aws-sdk/clients/s3'
 import session from 'express-session';
-// import Document from './models/document-model';
-
-//import mongoose, { ObjectId } from 'mongoose'
-
 
 const multer = require('multer')
 const multerS3 = require('multer-s3')
 
 import * as Y from 'yjs';
-import { idText } from 'typescript';
-
-const fs = require('fs')
 
 dotenv.config();
 const app: express.Application = express();
@@ -72,68 +65,6 @@ const { Client } = require('@elastic/elasticsearch')
 const elasticClient = new Client({
     node: 'http://localhost:9200'
 })
-
-const elasticCreateIndex = async() => {
-    // const result = await elasticClient.index({
-    //     index: 'docs',
-    //     id: id,
-    //     document: {
-    //         name: doc.name,
-    //         content: ""
-    //     },
-    //     refresh: true
-    // })
-
-    const result = await elasticClient.indices.create({
-        index: 'docs',
-        settings: {
-            analysis: {
-                analyzer: {
-                    text_analyzer: {
-                        type: "custom",
-                        tokenizer: "standard",
-                        filter: [
-                            "lowercase",
-                            "english_stop",
-                            "porter_stem",
-                        ]
-                    }
-                },
-                filter: {
-                    english_stop: {
-                        type: "stop",
-                        stopwords: "_english_",
-                    }
-                }
-            }
-        },
-        mappings: {
-            properties: {
-                content: { 
-                    type: "text",
-                    search_analyzer: "text_analyzer"
-                }
-            }
-        }
-    })
-    await elasticClient.indices.refresh({ index: 'docs' })
-    return result;
-}
-//elasticCreateIndex();
-
-// const elasticCreateDoc = async(id: string, name: string) => {
-//     const result = await elasticClient.index({
-//         index: 'docs',                  
-//         id: id,
-//         document: {
-//             name: name,
-//             content: '',
-//         },
-//         refresh: true,      // true || 'wait_for'
-//     });
-//     //await elasticClient.indices.refresh({ index: 'docs' })
-//     return result;
-// }
 
 const elasticUpdateDoc = async(name: string, text: string, id: string) => {
     const result = await elasticClient.index({
@@ -348,26 +279,6 @@ const verify = async (req, res) => {
     }
 }
 
-// const fileToBinary = async(file) => {
-//     return new Promise((resolve, reject) => {
-//         const reader = new FileReader();
-
-//         reader.addEventListener("load", () => resolve(reader.result));
-//         reader.addEventListener("error", err => reject(err));
-
-//         reader.readAsBinaryString(file);
-//     });
-// }
-
-// const fileToBinary = (file) => {
-//     fs.readFile(file, 'utf8', function(error, data) {
-//         if (error)
-//             return console.error(error);
-//         console.log(data);
-//         return data;
-//     })
-// }
-
 const s3 = new S3({
     endpoint: process.env.S3_ENDPOINT,
     accessKeyId: process.env.S3_ACCESSKEYID,
@@ -386,67 +297,6 @@ const uploadS3 = multer({
     })
   });
 
-// const mediaUpload = async (req, res) => {
-//     try {
-//         console.log("mediaUpload receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
-//         if (!req.session.session_id) {
-//             const user = await getUserNameAndId(req.cookies.token)
-//             if (!user) {
-//                 console.error("/media/upload: Unauthorized user")
-//                 return res.status(200).send({ error: true, message: "Unauthourized user" });
-//             }
-//             req.session.session_id = makeId();
-//             req.session.name = user.name;
-//         }
-        
-//         let file = req.body;
-//         console.log(req.body);
-//         file = await fileToBinary(file);
-//         console.log(file);
-//         const contentType = req.header('content-type');
-//         console.log("mediaUpload receive file: contentType: " + contentType);
-//         console.log("file: " + file.toString())
-//         if (!file) {
-//             return res.status(200).send({ error: true, message: "Missing file" });
-//         }
-//         // if (contentType !== 'image/jpeg' && contentType !== 'image/png') {
-//         //     return res.status(200).send({ error: true, message: "Only accept jpeg/png file" });
-//         // }
-
-//         const key = makeId()
-
-//         const s3 = new S3({
-//             endpoint: process.env.S3_ENDPOINT,
-//             accessKeyId: process.env.S3_ACCESSKEYID,
-//             secretAccessKey: process.env.S3_SECRETACCESSKEY,
-//             sslEnabled: true
-//         });
-
-//         const params = {
-//             Bucket: "images",
-//             Body: file,
-//             Key: key,
-//             ContentType: contentType
-//         }
-
-//         s3.putObject(params, (error, data) => {
-//             if (error) {
-//                 console.log(error);
-//                 return res.status(200).send({ error: true, message: "Fail to put in" });
-//             }
-//             else {
-//                 console.log("Media stored -- Key: ", key);
-//                 console.log(data);
-//                 return res.status(200).send({ mediaid: key });
-//             }
-//         })
-//     }
-//     catch (err) {
-//         console.error("/media/upload: Error occurred: " + err);
-//         return res.status(200).send({ error: true, message: "An error has occurred" });
-//     }
-
-// }
 
 const mediaUpload = async (req, res) => { 
     console.log(req.file);
@@ -569,11 +419,6 @@ const collectionCreate = async (req, res) => {
             res.status(200).json({ error: true, message: "Missing document name" });
         }
 
-        // const doc = new Document({
-        //     name: name
-        // });
-
-        // await doc.save();
         const id = makeId();
         addToRecent({ name: name, id: id })
         console.log("/collection/create: Created document:" + name, id)
@@ -584,7 +429,6 @@ const collectionCreate = async (req, res) => {
             cursors: new Map()
         };
         ydocs.set(id, ydoc)
-        //await elasticCreateIndex(ydoc, id);
         await elasticUpdateDoc(name, "", id);
         // TODO: check error
         return res.status(200).send({ id: id })
@@ -654,11 +498,6 @@ const connect = async (req, res) => {
             console.error("/api/connect: Missing document id")
             return res.status(200).send({ error: true, message: "Missing document id" });
         }
-        // const doc = await Document.findById({ _id: id });
-        // if (!doc) {
-        //     console.error("/api/connect: Fail to find document with id: " + id)
-        //     return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-        // }
 
         const ydoc = ydocs.get(id);
         if (!ydoc) {
@@ -724,11 +563,6 @@ const op = async (req, res) => {
             console.error("/api/op: Missing document id")
             return res.status(200).send({ error: true, message: "Missing document id" });
         }
-        // const doc = await Document.findById({ _id: id });
-        // if (!doc) {
-        //     console.error("/api/op: Fail to find document with id: " + id)
-        //     return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-        // }
 
         console.log("Doc " + id + " receives Update: " + update)
         const ydoc = ydocs.get(id);
@@ -785,19 +619,12 @@ const presence = async (req, res) => {
             console.error("/api/presence: Missing document id")
             return res.status(200).send({ error: true, message: "Missing document id" });
         }
-        // const doc = await Document.findById({ _id: id });
-        // if (!doc) {
-        //     console.error("/api/presence: Fail to find document with id: " + id)
-        //     return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-        // }
 
         const ydoc = ydocs.get(id);
         if (ydoc) {
             console.log("Found doc " + id)
             let tmpcursor = ydoc.cursors.get(clientId)
             if (!tmpcursor) {
-                // console.error("/api/presence: Fail to find client with id: " + clientId)
-                // return res.status(200).send({ error: true, message: "Fail to find client with id: " + clientId });
                 tmpcursor = {name: req.session.name, cursor: {}}
             }
             tmpcursor.cursor = { index: index, length: length }
