@@ -194,6 +194,11 @@ const elasticSearch = async(phrase) => {
                 ]
             }
         },
+        highlight: {
+            fields: {
+                content: {}
+            }
+        },
         from: 0,
         size: 10
     })
