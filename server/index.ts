@@ -74,7 +74,7 @@ const elasticUpdateDoc = async(name: string, text: string, id: string) => {
             name: name,
             content: text,
         },
-        refresh: true,      // true || 'wait_for'
+        refresh: "wait_for",      // true || 'wait_for'
     });
     //await elasticClient.indices.refresh({ index: 'docs' })
     return result;
@@ -85,7 +85,7 @@ const elasticDeleteDoc = async(id: string) => {
         index: 'docs',
         id: id,
         type: '_doc',
-        refresh: true,      // true || 'wait_for'
+        refresh: "wait_for",      // true || 'wait_for'
     });
     //await elasticClient.indices.refresh({ index: 'docs' })
     return result;
