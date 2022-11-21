@@ -82,7 +82,8 @@ const elasticCreateDoc = async(name: string, text: string) => {
 }
 
 const elasticUpdateDoc = async(name: string, text: string, id: string) => {
-    const result = await elasticClient.index({
+    // const result = await elasticClient.index({
+    elasticClient.index({
         index: 'docs',
         id: id,
         document: {
@@ -92,22 +93,23 @@ const elasticUpdateDoc = async(name: string, text: string, id: string) => {
         //refresh: "wait_for",      // true || 'wait_for'
     });
     //await elasticClient.indices.refresh({ index: 'docs' })
-    return result;
+    // return result;
 }
 
 const elasticDeleteDoc = async(id: string) => {
-    const result = await elasticClient.delete({
+    // const result = await elasticClient.delete({
+    elasticClient.delete({
         index: 'docs',
         id: id,
         type: '_doc',
         //refresh: "wait_for",      // true || 'wait_for'
     });
     //await elasticClient.indices.refresh({ index: 'docs' })
-    return result;
+    // return result;
 }
 
 const elasticSearch = async(query: string) => {
-    const result = await elasticClient.search({
+    return await elasticClient.search({
         index: 'docs',
         query: {
             multi_match: {
@@ -129,8 +131,7 @@ const elasticSearch = async(query: string) => {
         _source: [
             "name"
         ]
-    })
-    return result;
+    });
 }
 
 const elasticSuggest = async(query: string) => {
@@ -212,6 +213,7 @@ const signup = async (req, res) => {
             return res.status(200).send({ error: true, message: "User with this credential already exists" });
         }
 
+        res.status(200).send({});
         const salt = await bycrypt.genSalt();
         const passwordHash = await bycrypt.hash(password, salt);
 
@@ -233,14 +235,14 @@ const signup = async (req, res) => {
         //console.log(link)
 
         const sent = await sendEmail(newUser.email, link, link);
-        if (!sent) {
-            console.error("/users/signup: Verification email failed to send");
-            return res.status(200).send({ error: true, message: "An error has occurred" });
-        }
-
-        await newUser.save();
+        // if (!sent) {
+        //     console.error("/users/signup: Verification email failed to send");
+        //     return res.status(200).send({ error: true, message: "An error has occurred" });
+        // }
+        
+        
         //console.log("/users/signup: New user successfully added \n", name, passwordHash, email);
-        return res.status(200).send({});
+        newUser.save();
     }
     catch (e) {
         console.error("/users/signup: Error occurred: " + e);
