@@ -17,6 +17,8 @@ import session from 'express-session';
 const multer = require('multer')
 const multerS3 = require('multer-s3')
 
+require('events').EventEmitter.defaultMaxListeners = 64;
+
 import * as Y from 'yjs';
 
 dotenv.config();
