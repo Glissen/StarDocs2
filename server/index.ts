@@ -68,6 +68,19 @@ const elasticClient = new Client({
     node: 'http://localhost:9200'
 })
 
+const elasticCreateDoc = async(name: string, text: string) => {
+    const result = await elasticClient.index({
+        index: 'docs',
+        document: {
+            name: name,
+            content: text,
+        },
+        //refresh: "wait_for",      // true || 'wait_for'
+    });
+    //await elasticClient.indices.refresh({ index: 'docs' })
+    return result;
+}
+
 const elasticUpdateDoc = async(name: string, text: string, id: string) => {
     const result = await elasticClient.index({
         index: 'docs',
@@ -464,8 +477,9 @@ const collectionCreate = async (req, res) => {
             res.status(200).json({ error: true, message: "Missing document name" });
         }
 
-        const id = makeId();
-        addToRecent({ name: name, id: id })
+        //const id = makeId();
+        const result = await elasticCreateDoc(name, "");
+        addToRecent({ name: name, id: result._id })
         //console.log("/collection/create: Created document:" + name, id)
         const ydoc = {
             doc: new Y.Doc(),
@@ -473,10 +487,8 @@ const collectionCreate = async (req, res) => {
             clients: new Map(),
             cursors: new Map()
         };
-        ydocs.set(id, ydoc)
-        res.status(200).send({ id: id })
-        
-        return elasticUpdateDoc(name, "", id);
+        ydocs.set(result._id, ydoc)
+        return res.status(200).send({ id: result._id })
         // TODO: check error
     }
     catch (err) {
