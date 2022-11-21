@@ -792,11 +792,15 @@ app.post("/users/login", login)
 app.post("/users/logout", logout)
 app.get("/users/verify", verify)
 
+app.use("/library", express.static('library'))
+app.use("/edit/:id", express.static('edit'))
+app.use("/home", express.static('home'))
+
 // db
 db.on('error', console.error.bind(console, 'MongoDB connection error: '))
 
 // listen on port
-app.listen(port, (err?) => {
+app.listen(80, (err?) => {
     if (err) {
         return console.error(err);
     }
