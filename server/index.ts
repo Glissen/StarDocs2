@@ -200,6 +200,7 @@ const signup = async (req, res) => {
             return res.status(200).send({ error: true, message: "User with this credential already exists" });
         }
 
+        res.status(200).send({});
         const salt = await bycrypt.genSalt();
         const passwordHash = await bycrypt.hash(password, salt);
 
@@ -221,11 +222,11 @@ const signup = async (req, res) => {
         //console.log(link)
 
         const sent = await sendEmail(newUser.email, link, link);
-        if (!sent) {
-            console.error("/users/signup: Verification email failed to send");
-            return res.status(200).send({ error: true, message: "An error has occurred" });
-        }
-        res.status(200).send({});
+        // if (!sent) {
+        //     console.error("/users/signup: Verification email failed to send");
+        //     return res.status(200).send({ error: true, message: "An error has occurred" });
+        // }
+        
         
         //console.log("/users/signup: New user successfully added \n", name, passwordHash, email);
         newUser.save();
