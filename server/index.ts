@@ -613,7 +613,6 @@ const op = async (req, res) => {
         const ydoc = ydocs.get(id);
         if (ydoc) {
             console.log("Found doc " + id)
-            res.send({});
             console.log("Text before update: " + ydoc.doc.getText().toString())
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             console.log("Text after update: " + ydoc.doc.getText().toString())
@@ -622,10 +621,11 @@ const op = async (req, res) => {
             // TODO: check error
 
             addToRecent({ name: ydoc.name, id: id })
-            return ydoc.clients.forEach((client, key) => {
+            ydoc.clients.forEach((client, key) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
                 console.log("Sending update to client " + key)
             });
+            return res.send({});
         }
         else {
             console.log("Fail to find doc " + id)
