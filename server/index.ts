@@ -794,6 +794,7 @@ app.get("/users/verify", verify)
 
 app.use("/library", express.static('library'))
 app.use("/edit/:id", express.static('edit'))
+app.use("/edit", express.static('edit'))
 app.use("/home", express.static('home', {
     setHeaders: function (res, path) {
         res.set('X-CSE356', "6306d31458d8bb3ef7f6bbe1");
