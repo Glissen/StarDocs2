@@ -609,14 +609,14 @@ const op = async (req, res) => {
             return res.status(200).send({ error: true, message: "Missing document id" });
         }
 
-        //console.log("Doc " + id + " receives Update: " + update)
+        console.log("Doc " + id + " receives Update: " + update)
         const ydoc = ydocs.get(id);
         if (ydoc) {
-            //console.log("Found doc " + id)
+            console.log("Found doc " + id)
             res.send({});
-            // console.log("Text before update: " + ydoc.doc.getText().toString())
+            console.log("Text before update: " + ydoc.doc.getText().toString())
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
-            // console.log("Text after update: " + ydoc.doc.getText().toString())
+            console.log("Text after update: " + ydoc.doc.getText().toString())
 
             await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
             // TODO: check error
