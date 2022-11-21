@@ -66,89 +66,89 @@ const elasticClient = new Client({
     node: 'http://localhost:9200'
 })
 
-const elasticUpdateDoc = async(name: string, text: string, id: string) => {
-    const result = await elasticClient.index({
-        index: 'docs',
-        id: id,
-        document: {
-            name: name,
-            content: text,
-        },
-        refresh: "wait_for",      // true || 'wait_for'
-    });
-    //await elasticClient.indices.refresh({ index: 'docs' })
-    return result;
-}
+// const elasticUpdateDoc = async(name: string, text: string, id: string) => {
+//     const result = await elasticClient.index({
+//         index: 'docs',
+//         id: id,
+//         document: {
+//             name: name,
+//             content: text,
+//         },
+//         refresh: "wait_for",      // true || 'wait_for'
+//     });
+//     //await elasticClient.indices.refresh({ index: 'docs' })
+//     return result;
+// }
 
-const elasticDeleteDoc = async(id: string) => {
-    const result = await elasticClient.delete({
-        index: 'docs',
-        id: id,
-        type: '_doc',
-        refresh: "wait_for",      // true || 'wait_for'
-    });
-    //await elasticClient.indices.refresh({ index: 'docs' })
-    return result;
-}
+// const elasticDeleteDoc = async(id: string) => {
+//     const result = await elasticClient.delete({
+//         index: 'docs',
+//         id: id,
+//         type: '_doc',
+//         refresh: "wait_for",      // true || 'wait_for'
+//     });
+//     //await elasticClient.indices.refresh({ index: 'docs' })
+//     return result;
+// }
 
-const elasticSearch = async(query: string) => {
-    const result = await elasticClient.search({
-        index: 'docs',
-        query: {
-            multi_match: {
-                query: query,
-                fields: [
-                    "name",
-                    "content"
-                ]
-            }
-        },
-        highlight: {
-            fields: {
-                name: {},
-                content: {}
-            }
-        },
-        from: 0,
-        size: 10,
-        _source: [
-            "name"
-        ]
-    })
-    return result;
-}
+// const elasticSearch = async(query: string) => {
+//     const result = await elasticClient.search({
+//         index: 'docs',
+//         query: {
+//             multi_match: {
+//                 query: query,
+//                 fields: [
+//                     "name",
+//                     "content"
+//                 ]
+//             }
+//         },
+//         highlight: {
+//             fields: {
+//                 name: {},
+//                 content: {}
+//             }
+//         },
+//         from: 0,
+//         size: 10,
+//         _source: [
+//             "name"
+//         ]
+//     })
+//     return result;
+// }
 
-const elasticSuggest = async(query: string) => {
-    const result = await elasticClient.search({
-        query: {
-            bool: {
-                should: [
-                    {
-                        match_phrase_prefix: {
-                            content: query
-                        }
-                    },
-                    {
-                        match_phrase_prefix: {
-                            name: query
-                        }
-                    }
-                ]
-            }
-        },
-        highlight: {
-            boundary_scanner: "word",
-            fields: {
-                "content": {},
-                "name": {}
-            }
-        },
-        from: 0,
-        size: 10,
-        _source: [""]
-    })
-    return result;
-}
+// const elasticSuggest = async(query: string) => {
+//     const result = await elasticClient.search({
+//         query: {
+//             bool: {
+//                 should: [
+//                     {
+//                         match_phrase_prefix: {
+//                             content: query
+//                         }
+//                     },
+//                     {
+//                         match_phrase_prefix: {
+//                             name: query
+//                         }
+//                     }
+//                 ]
+//             }
+//         },
+//         highlight: {
+//             boundary_scanner: "word",
+//             fields: {
+//                 "content": {},
+//                 "name": {}
+//             }
+//         },
+//         from: 0,
+//         size: 10,
+//         _source: [""]
+//     })
+//     return result;
+// }
 
 
 const getUserNameAndId = async (cookie) => {
