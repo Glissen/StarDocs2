@@ -613,14 +613,14 @@ const op = async (req, res) => {
         const ydoc = ydocs.get(id);
         if (ydoc) {
             //console.log("Found doc " + id)
-            res.send({});
+            
             // console.log("Text before update: " + ydoc.doc.getText().toString())
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
 
             await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
             // TODO: check error
-
+            res.send({});
             addToRecent({ name: ydoc.name, id: id })
             return ydoc.clients.forEach((client, key) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
