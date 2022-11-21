@@ -612,6 +612,7 @@ const op = async (req, res) => {
         // console.log("Doc " + id + " receives Update: " + update)
         const ydoc = ydocs.get(id);
         if (ydoc) {
+            res.send({});
             // console.log("Found doc " + id)
             // console.log("Text before update: " + ydoc.doc.getText().toString())
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
@@ -619,7 +620,7 @@ const op = async (req, res) => {
 
             await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
             // TODO: check error
-            res.send({});
+            
 
             addToRecent({ name: ydoc.name, id: id })
             return ydoc.clients.forEach((client, key) => {
