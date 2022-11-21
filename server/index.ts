@@ -68,14 +68,39 @@ const elasticClient = new Client({
     node: 'http://localhost:9200'
 })
 
-const elasticCreateDoc = async(name: string, text: string) => {
+const bulkUpdate = async() => {
+    //let temp = [];
+    ydocs.forEach((ydoc, key) => {
+        if (ydoc.updated) {
+            ydoc.updated = false;
+            // temp.push({ index: { _index: "docs", _id: key }})
+            // temp.push({ content: ydoc.doc.getText(), name: ydoc.name })
+            elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), key);
+        }
+    })
+    // const result = await elasticClient.helpers.bulk({
+    //     datasource: temp,
+    //     onDocument (doc) {
+    //         return {
+    //             index: { _index: "docs", _id: doc.id },
+    //             name: 
+    //             content: doc.content,
+
+
+    //         }
+    //     }
+    // })
+
+}
+
+const elasticCreateDoc = async(name: string) => {
     const result = await elasticClient.index({
         index: 'docs',
         document: {
             name: name,
-            content: text,
+            content: '',
         },
-        //refresh: "wait_for",      // true || 'wait_for'
+        refresh: true,      // true || 'wait_for'
     });
     //await elasticClient.indices.refresh({ index: 'docs' })
     return result;
@@ -90,7 +115,7 @@ const elasticUpdateDoc = async(name: string, text: string, id: string) => {
             name: name,
             content: text,
         },
-        //refresh: "wait_for",      // true || 'wait_for'
+        refresh: true,      // true || 'wait_for'
     });
     //await elasticClient.indices.refresh({ index: 'docs' })
     // return result;
@@ -480,12 +505,13 @@ const collectionCreate = async (req, res) => {
         }
 
         //const id = makeId();
-        const result = await elasticCreateDoc(name, "");
+        const result = await elasticCreateDoc(name);
         addToRecent({ name: name, id: result._id })
         //console.log("/collection/create: Created document:" + name, id)
         const ydoc = {
             doc: new Y.Doc(),
             name: name,
+            updated: false,
             clients: new Map(),
             cursors: new Map()
         };
@@ -628,13 +654,14 @@ const op = async (req, res) => {
         // console.log("Doc " + id + " receives Update: " + update)
         const ydoc = ydocs.get(id);
         if (ydoc) {
+            ydoc.updated = true;
             res.send({});
             // console.log("Found doc " + id)
             // console.log("Text before update: " + ydoc.doc.getText().toString())
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
 
-            await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
+            //await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
             // TODO: check error
             
 
@@ -838,6 +865,10 @@ app.listen(80, (err?) => {
     return console.log(`server is listening on ${port}`);
 });
 
+const interval = setInterval(function() {
+    bulkUpdate();
+}, 500);
+
 
 type document = {
     name: string,
@@ -847,7 +878,8 @@ type document = {
 
 type ydoc = {
     doc: any,
-    name: string
+    name: string,
+    updated: boolean
     clients: Map<string, client>,
     cursors: Map<string, cursor>
 }
