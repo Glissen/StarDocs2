@@ -472,9 +472,10 @@ const collectionCreate = async (req, res) => {
             cursors: new Map()
         };
         ydocs.set(id, ydoc)
-        await elasticUpdateDoc(name, "", id);
+        res.status(200).send({ id: id })
+        
+        return elasticUpdateDoc(name, "", id);
         // TODO: check error
-        return res.status(200).send({ id: id })
     }
     catch (err) {
         console.error("/collection/create: Error occurred: " + err);
@@ -508,8 +509,8 @@ const collectionDelete = async (req, res) => {
             doc.clients.forEach(client => {
                 client.response.status(200).send();
             })
-            await elasticDeleteDoc(id)
-            return res.status(200).send({});
+            res.status(200).send({});
+            return await elasticDeleteDoc(id)
         }
         else {
             console.error("/api/delete: Fail to find document with id from db: " + id)
