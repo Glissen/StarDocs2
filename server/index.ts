@@ -625,7 +625,9 @@ const op = async (req, res) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
                 console.log("Sending update to client " + key)
             });
-            return res.send({});
+            return setTimeout(function(){
+                res.send({});
+            }, 200);
         }
         else {
             console.log("Fail to find doc " + id)
