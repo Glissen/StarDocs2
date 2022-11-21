@@ -183,7 +183,7 @@ const getUserNameAndId = async (cookie) => {
 const signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        //console.log("Signup received:", name, email, password);
+        console.log("Signup received:", name, email, password);
 
         if (!name || !email || !password) {
             console.error("/users/signup: Missing user credentials")
@@ -236,7 +236,7 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        //console.log("Login received:", email, password);
+        console.log("Login received:", email, password);
         if (!email || !password) {
             console.error("/users/login: Missing user credentials")
             return res.status(200).send({ error: true, message: "Missing user credentials" });
@@ -313,7 +313,7 @@ const verify = async (req, res) => {
         user.verified = true;
         await user.save();
 
-        //console.log("/users/verify: New user successfully verified")
+        console.log("/users/verify: New user successfully verified")
         return res.status(200).send({ status: 'OK' });
     }
     catch (err) {
@@ -342,7 +342,7 @@ const uploadS3 = multer({
 
 
 const mediaUpload = async (req, res) => { 
-    //console.log(req.file);
+    console.log(req.file);
     if (!req.session.session_id) {
         const user = await getUserNameAndId(req.cookies.token)
         if (!user) {
@@ -368,7 +368,7 @@ const mediaUpload = async (req, res) => {
 
 const mediaAccess = async (req, res) => {
     try {
-        //console.log("mediaAccess receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        console.log("mediaAccess receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -420,7 +420,7 @@ const mediaAccess = async (req, res) => {
 
 const collectionList = async (req, res) => {
     try {
-        //console.log("collectionList receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        console.log("collectionList receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -445,7 +445,7 @@ const collectionList = async (req, res) => {
 
 const collectionCreate = async (req, res) => {
     try {
-        //console.log("collectionCreate receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        console.log("collectionCreate receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -485,7 +485,7 @@ const collectionCreate = async (req, res) => {
 
 const collectionDelete = async (req, res) => {
     try {
-        //console.log("collectionDelete receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        console.log("collectionDelete receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -526,7 +526,7 @@ const collectionDelete = async (req, res) => {
 
 const connect = async (req, res) => {
     try {
-        //console.log("apiConnect receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        console.log("apiConnect receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -591,7 +591,7 @@ const connect = async (req, res) => {
 
 const op = async (req, res) => {
     try {
-        //console.log("apiOP receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        console.log("apiOP receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -641,7 +641,7 @@ const op = async (req, res) => {
 
 const presence = async (req, res) => {
     try {
-        //console.log("apiPresence receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        console.log("apiPresence receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
