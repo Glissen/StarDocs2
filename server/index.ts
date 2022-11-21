@@ -66,89 +66,89 @@ const elasticClient = new Client({
     node: 'http://localhost:9200'
 })
 
-// const elasticUpdateDoc = async(name: string, text: string, id: string) => {
-//     const result = await elasticClient.index({
-//         index: 'docs',
-//         id: id,
-//         document: {
-//             name: name,
-//             content: text,
-//         },
-//         refresh: "wait_for",      // true || 'wait_for'
-//     });
-//     //await elasticClient.indices.refresh({ index: 'docs' })
-//     return result;
-// }
+const elasticUpdateDoc = async(name: string, text: string, id: string) => {
+    const result = await elasticClient.index({
+        index: 'docs',
+        id: id,
+        document: {
+            name: name,
+            content: text,
+        },
+        refresh: "wait_for",      // true || 'wait_for'
+    });
+    //await elasticClient.indices.refresh({ index: 'docs' })
+    return result;
+}
 
-// const elasticDeleteDoc = async(id: string) => {
-//     const result = await elasticClient.delete({
-//         index: 'docs',
-//         id: id,
-//         type: '_doc',
-//         refresh: "wait_for",      // true || 'wait_for'
-//     });
-//     //await elasticClient.indices.refresh({ index: 'docs' })
-//     return result;
-// }
+const elasticDeleteDoc = async(id: string) => {
+    const result = await elasticClient.delete({
+        index: 'docs',
+        id: id,
+        type: '_doc',
+        refresh: "wait_for",      // true || 'wait_for'
+    });
+    //await elasticClient.indices.refresh({ index: 'docs' })
+    return result;
+}
 
-// const elasticSearch = async(query: string) => {
-//     const result = await elasticClient.search({
-//         index: 'docs',
-//         query: {
-//             multi_match: {
-//                 query: query,
-//                 fields: [
-//                     "name",
-//                     "content"
-//                 ]
-//             }
-//         },
-//         highlight: {
-//             fields: {
-//                 name: {},
-//                 content: {}
-//             }
-//         },
-//         from: 0,
-//         size: 10,
-//         _source: [
-//             "name"
-//         ]
-//     })
-//     return result;
-// }
+const elasticSearch = async(query: string) => {
+    const result = await elasticClient.search({
+        index: 'docs',
+        query: {
+            multi_match: {
+                query: query,
+                fields: [
+                    "name",
+                    "content"
+                ]
+            }
+        },
+        highlight: {
+            fields: {
+                name: {},
+                content: {}
+            }
+        },
+        from: 0,
+        size: 10,
+        _source: [
+            "name"
+        ]
+    })
+    return result;
+}
 
-// const elasticSuggest = async(query: string) => {
-//     const result = await elasticClient.search({
-//         query: {
-//             bool: {
-//                 should: [
-//                     {
-//                         match_phrase_prefix: {
-//                             content: query
-//                         }
-//                     },
-//                     {
-//                         match_phrase_prefix: {
-//                             name: query
-//                         }
-//                     }
-//                 ]
-//             }
-//         },
-//         highlight: {
-//             boundary_scanner: "word",
-//             fields: {
-//                 "content": {},
-//                 "name": {}
-//             }
-//         },
-//         from: 0,
-//         size: 10,
-//         _source: [""]
-//     })
-//     return result;
-// }
+const elasticSuggest = async(query: string) => {
+    const result = await elasticClient.search({
+        query: {
+            bool: {
+                should: [
+                    {
+                        match_phrase_prefix: {
+                            content: query
+                        }
+                    },
+                    {
+                        match_phrase_prefix: {
+                            name: query
+                        }
+                    }
+                ]
+            }
+        },
+        highlight: {
+            boundary_scanner: "word",
+            fields: {
+                "content": {},
+                "name": {}
+            }
+        },
+        from: 0,
+        size: 10,
+        _source: [""]
+    })
+    return result;
+}
 
 
 const getUserNameAndId = async (cookie) => {
@@ -474,7 +474,7 @@ const collectionCreate = async (req, res) => {
         ydocs.set(id, ydoc)
         res.status(200).send({ id: id })
         
-        //return elasticUpdateDoc(name, "", id);
+        return elasticUpdateDoc(name, "", id);
         // TODO: check error
     }
     catch (err) {
@@ -510,7 +510,7 @@ const collectionDelete = async (req, res) => {
                 client.response.status(200).send();
             })
             res.status(200).send({});
-            //return await elasticDeleteDoc(id)
+            return await elasticDeleteDoc(id)
         }
         else {
             console.error("/api/delete: Fail to find document with id from db: " + id)
@@ -618,7 +618,7 @@ const op = async (req, res) => {
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
 
-            //await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
+            await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
             // TODO: check error
 
             addToRecent({ name: ydoc.name, id: id })
@@ -691,89 +691,89 @@ const presence = async (req, res) => {
     }
 }
 
-// const search = async (req, res) => {
-//     try {
-//         //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
-//         if (!req.session.session_id) {
-//             const user = await getUserNameAndId(req.cookies.token)
-//             if (!user) {
-//                 console.error("/index/search: Unauthorized user")
-//                 return res.status(200).send({ error: true, message: "Unauthourized user" });
-//             }
-//             req.session.session_id = makeId();
-//             req.session.name = user.name;
-//         }
+const search = async (req, res) => {
+    try {
+        //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        if (!req.session.session_id) {
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/index/search: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
+        }
 
-//         const { q } = req.query;
+        const { q } = req.query;
 
-//         const result = await elasticSearch(q);
+        const result = await elasticSearch(q);
 
-//         const size = result.hits.hits.length;
-//         const ans = new Array(size);
+        const size = result.hits.hits.length;
+        const ans = new Array(size);
 
-//         for (let index = 0; index < size; index++) {
-//             const element = result.hits.hits[index];
-//             const hl = element.highlight.name ? element.highlight.name[0] : element.highlight.content[0];
-//             ans[index] = {docid: element._id, name: element._source.name, snippet: hl};
-//         }
+        for (let index = 0; index < size; index++) {
+            const element = result.hits.hits[index];
+            const hl = element.highlight.name ? element.highlight.name[0] : element.highlight.content[0];
+            ans[index] = {docid: element._id, name: element._source.name, snippet: hl};
+        }
 
-//         res.status(200).send(ans);
-//     }
-//     catch (err) {
-//         console.error("/index/search: Error occurred: " + err);
-//         return res.status(200).send({ error: true, message: "An error has occurred" });
-//     }
-// }
+        res.status(200).send(ans);
+    }
+    catch (err) {
+        console.error("/index/search: Error occurred: " + err);
+        return res.status(200).send({ error: true, message: "An error has occurred" });
+    }
+}
 
 
-// const suggest = async (req, res) => {
-//     try {
-//         //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
-//         if (!req.session.session_id) {
-//             const user = await getUserNameAndId(req.cookies.token)
-//             if (!user) {
-//                 console.error("/index/suggest: Unauthorized user")
-//                 return res.status(200).send({ error: true, message: "Unauthourized user" });
-//             }
-//             req.session.session_id = makeId();
-//             req.session.name = user.name;
-//         }
+const suggest = async (req, res) => {
+    try {
+        //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        if (!req.session.session_id) {
+            const user = await getUserNameAndId(req.cookies.token)
+            if (!user) {
+                console.error("/index/suggest: Unauthorized user")
+                return res.status(200).send({ error: true, message: "Unauthourized user" });
+            }
+            req.session.session_id = makeId();
+            req.session.name = user.name;
+        }
 
-//         const { q } = req.query;
+        const { q } = req.query;
 
-//         //const result = await elasticSuggest(q);
+        const result = await elasticSuggest(q);
 
-//         const size = result.hits.hits.length;
-//         const ans = new Set();
+        const size = result.hits.hits.length;
+        const ans = new Set();
 
-//         for (let index = 0; index < size; index++) {
-//             const element = result.hits.hits[index];
-//             if (element.highlight.name) {
-//                 for (let i = 0; i < element.highlight.name.length; i ++) {
-//                     let word = element.highlight.name[i];
-//                     ans.add(word.slice(4, -5).toLowerCase());
-//                 }
-//             }
-//             if (element.highlight.content) {
-//                 for (let i = 0; i < element.highlight.content.length; i ++) {
-//                     let word = element.highlight.content[i];
-//                     ans.add(word.slice(4, -5).toLowerCase());
-//                 }
-//             }
-//         }
+        for (let index = 0; index < size; index++) {
+            const element = result.hits.hits[index];
+            if (element.highlight.name) {
+                for (let i = 0; i < element.highlight.name.length; i ++) {
+                    let word = element.highlight.name[i];
+                    ans.add(word.slice(4, -5).toLowerCase());
+                }
+            }
+            if (element.highlight.content) {
+                for (let i = 0; i < element.highlight.content.length; i ++) {
+                    let word = element.highlight.content[i];
+                    ans.add(word.slice(4, -5).toLowerCase());
+                }
+            }
+        }
         
-//         res.status(200).send(Array.from(ans));
-//     }
-//     catch (err) {
-//         console.error("/index/suggest: Error occurred: " + err);
-//         return res.status(200).send({ error: true, message: "An error has occurred" });
-//     }
-// }
+        res.status(200).send(Array.from(ans));
+    }
+    catch (err) {
+        console.error("/index/suggest: Error occurred: " + err);
+        return res.status(200).send({ error: true, message: "An error has occurred" });
+    }
+}
 
 
 
-// app.get('/index/search', search);
-// app.get('/index/suggest', suggest);
+app.get('/index/search', search);
+app.get('/index/suggest', suggest);
 
 app.post('/collection/create', collectionCreate);
 app.post('/collection/delete', collectionDelete);
