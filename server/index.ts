@@ -793,11 +793,12 @@ app.post("/users/logout", logout)
 app.get("/users/verify", verify)
 
 app.use("/library", express.static('library'))
-// app.use("/edit/:id", (req, res) => {
-//     res.set("Content-Type", "text/html")
-//     return res.status(200).send('<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>MP1</title><script defer="defer" src="/edit/static/js/main.3027cd66.js"></script><link href="/edit/static/css/main.2ce06e37.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div><hr><p>This is a test of the CRDT library.</p><p>If the basic functionality of the library works correctly, you should see &quot;Hello <b>World</b>!&quot; above,<br/>preceded by the sequence of CRDT updates that could be sent to the client to construct this string.</p></body></html>');
-// })
+
 app.use("/edit", express.static('edit'))
+app.use("/edit/:id", (req, res) => {
+    res.set("Content-Type", "text/html")
+    return res.status(200).send('<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>MP1</title><script defer="defer" src="/edit/static/js/main.3027cd66.js"></script><link href="/edit/static/css/main.2ce06e37.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div><hr><p>This is a test of the CRDT library.</p><p>If the basic functionality of the library works correctly, you should see &quot;Hello <b>World</b>!&quot; above,<br/>preceded by the sequence of CRDT updates that could be sent to the client to construct this string.</p></body></html>');
+})
 app.use("/home", express.static('home', {
     setHeaders: function (res, path) {
         res.set('X-CSE356', "6306d31458d8bb3ef7f6bbe1");
