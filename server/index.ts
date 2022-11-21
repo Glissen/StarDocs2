@@ -474,7 +474,7 @@ const collectionCreate = async (req, res) => {
         ydocs.set(id, ydoc)
         res.status(200).send({ id: id })
         
-        return elasticUpdateDoc(name, "", id);
+        //return elasticUpdateDoc(name, "", id);
         // TODO: check error
     }
     catch (err) {
@@ -510,7 +510,7 @@ const collectionDelete = async (req, res) => {
                 client.response.status(200).send();
             })
             res.status(200).send({});
-            return await elasticDeleteDoc(id)
+            //return await elasticDeleteDoc(id)
         }
         else {
             console.error("/api/delete: Fail to find document with id from db: " + id)
@@ -618,7 +618,7 @@ const op = async (req, res) => {
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
 
-            await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
+            //await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
             // TODO: check error
 
             addToRecent({ name: ydoc.name, id: id })
@@ -706,7 +706,7 @@ const search = async (req, res) => {
 
         const { q } = req.query;
 
-        const result = await elasticSearch(q);
+        //const result = await elasticSearch(q);
 
         const size = result.hits.hits.length;
         const ans = new Array(size);
@@ -741,7 +741,7 @@ const suggest = async (req, res) => {
 
         const { q } = req.query;
 
-        const result = await elasticSuggest(q);
+        //const result = await elasticSuggest(q);
 
         const size = result.hits.hits.length;
         const ans = new Set();
