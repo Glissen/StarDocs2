@@ -691,89 +691,89 @@ const presence = async (req, res) => {
     }
 }
 
-const search = async (req, res) => {
-    try {
-        //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
-        if (!req.session.session_id) {
-            const user = await getUserNameAndId(req.cookies.token)
-            if (!user) {
-                console.error("/index/search: Unauthorized user")
-                return res.status(200).send({ error: true, message: "Unauthourized user" });
-            }
-            req.session.session_id = makeId();
-            req.session.name = user.name;
-        }
+// const search = async (req, res) => {
+//     try {
+//         //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+//         if (!req.session.session_id) {
+//             const user = await getUserNameAndId(req.cookies.token)
+//             if (!user) {
+//                 console.error("/index/search: Unauthorized user")
+//                 return res.status(200).send({ error: true, message: "Unauthourized user" });
+//             }
+//             req.session.session_id = makeId();
+//             req.session.name = user.name;
+//         }
 
-        const { q } = req.query;
+//         const { q } = req.query;
 
-        //const result = await elasticSearch(q);
+//         const result = await elasticSearch(q);
 
-        const size = result.hits.hits.length;
-        const ans = new Array(size);
+//         const size = result.hits.hits.length;
+//         const ans = new Array(size);
 
-        for (let index = 0; index < size; index++) {
-            const element = result.hits.hits[index];
-            const hl = element.highlight.name ? element.highlight.name[0] : element.highlight.content[0];
-            ans[index] = {docid: element._id, name: element._source.name, snippet: hl};
-        }
+//         for (let index = 0; index < size; index++) {
+//             const element = result.hits.hits[index];
+//             const hl = element.highlight.name ? element.highlight.name[0] : element.highlight.content[0];
+//             ans[index] = {docid: element._id, name: element._source.name, snippet: hl};
+//         }
 
-        res.status(200).send(ans);
-    }
-    catch (err) {
-        console.error("/index/search: Error occurred: " + err);
-        return res.status(200).send({ error: true, message: "An error has occurred" });
-    }
-}
+//         res.status(200).send(ans);
+//     }
+//     catch (err) {
+//         console.error("/index/search: Error occurred: " + err);
+//         return res.status(200).send({ error: true, message: "An error has occurred" });
+//     }
+// }
 
 
-const suggest = async (req, res) => {
-    try {
-        //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
-        if (!req.session.session_id) {
-            const user = await getUserNameAndId(req.cookies.token)
-            if (!user) {
-                console.error("/index/suggest: Unauthorized user")
-                return res.status(200).send({ error: true, message: "Unauthourized user" });
-            }
-            req.session.session_id = makeId();
-            req.session.name = user.name;
-        }
+// const suggest = async (req, res) => {
+//     try {
+//         //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+//         if (!req.session.session_id) {
+//             const user = await getUserNameAndId(req.cookies.token)
+//             if (!user) {
+//                 console.error("/index/suggest: Unauthorized user")
+//                 return res.status(200).send({ error: true, message: "Unauthourized user" });
+//             }
+//             req.session.session_id = makeId();
+//             req.session.name = user.name;
+//         }
 
-        const { q } = req.query;
+//         const { q } = req.query;
 
-        //const result = await elasticSuggest(q);
+//         //const result = await elasticSuggest(q);
 
-        const size = result.hits.hits.length;
-        const ans = new Set();
+//         const size = result.hits.hits.length;
+//         const ans = new Set();
 
-        for (let index = 0; index < size; index++) {
-            const element = result.hits.hits[index];
-            if (element.highlight.name) {
-                for (let i = 0; i < element.highlight.name.length; i ++) {
-                    let word = element.highlight.name[i];
-                    ans.add(word.slice(4, -5).toLowerCase());
-                }
-            }
-            if (element.highlight.content) {
-                for (let i = 0; i < element.highlight.content.length; i ++) {
-                    let word = element.highlight.content[i];
-                    ans.add(word.slice(4, -5).toLowerCase());
-                }
-            }
-        }
+//         for (let index = 0; index < size; index++) {
+//             const element = result.hits.hits[index];
+//             if (element.highlight.name) {
+//                 for (let i = 0; i < element.highlight.name.length; i ++) {
+//                     let word = element.highlight.name[i];
+//                     ans.add(word.slice(4, -5).toLowerCase());
+//                 }
+//             }
+//             if (element.highlight.content) {
+//                 for (let i = 0; i < element.highlight.content.length; i ++) {
+//                     let word = element.highlight.content[i];
+//                     ans.add(word.slice(4, -5).toLowerCase());
+//                 }
+//             }
+//         }
         
-        res.status(200).send(Array.from(ans));
-    }
-    catch (err) {
-        console.error("/index/suggest: Error occurred: " + err);
-        return res.status(200).send({ error: true, message: "An error has occurred" });
-    }
-}
+//         res.status(200).send(Array.from(ans));
+//     }
+//     catch (err) {
+//         console.error("/index/suggest: Error occurred: " + err);
+//         return res.status(200).send({ error: true, message: "An error has occurred" });
+//     }
+// }
 
 
 
-app.get('/index/search', search);
-app.get('/index/suggest', suggest);
+// app.get('/index/search', search);
+// app.get('/index/suggest', suggest);
 
 app.post('/collection/create', collectionCreate);
 app.post('/collection/delete', collectionDelete);
