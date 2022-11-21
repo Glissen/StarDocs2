@@ -171,7 +171,7 @@ const getUserNameAndId = async (cookie) => {
             console.error("/users/getusernameandid: User not verified");
             return null
         }
-        console.log("/users/getusernameandid: Found user", user.name, id)
+        //console.log("/users/getusernameandid: Found user", user.name, id)
         return { name: user.name, id: id }
     }
     catch (err) {
@@ -183,7 +183,7 @@ const getUserNameAndId = async (cookie) => {
 const signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        console.log("Signup received:", name, email, password);
+        //console.log("Signup received:", name, email, password);
 
         if (!name || !email || !password) {
             console.error("/users/signup: Missing user credentials")
@@ -215,7 +215,7 @@ const signup = async (req, res) => {
         await newToken.save();
 
         const link = 'http://duolcpu.cse356.compas.cs.stonybrook.edu/users/verify?' + "email=" + encodeURIComponent(newUser.email) + "&key=" + encodeURIComponent(newToken.token);
-        console.log(link)
+        //console.log(link)
 
         const sent = await sendEmail(newUser.email, link, link);
         if (!sent) {
@@ -224,7 +224,7 @@ const signup = async (req, res) => {
         }
 
         await newUser.save();
-        console.log("/users/signup: New user successfully added \n", name, passwordHash, email);
+        //console.log("/users/signup: New user successfully added \n", name, passwordHash, email);
         return res.status(200).send({});
     }
     catch (e) {
@@ -236,7 +236,7 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log("Login received:", email, password);
+        //console.log("Login received:", email, password);
         if (!email || !password) {
             console.error("/users/login: Missing user credentials")
             return res.status(200).send({ error: true, message: "Missing user credentials" });
@@ -257,7 +257,7 @@ const login = async (req, res) => {
         if (match) {
             const token = auth.signJWT(existingUser);
 
-            console.log("/users/login: User successfully logged in")
+            //console.log("/users/login: User successfully logged in")
             req.session.session_id = makeId();
             req.session.name = existingUser.name;
             return res.cookie("token", token, {
@@ -290,7 +290,7 @@ const logout = async (req, res) => {
 
 const verify = async (req, res) => {
     try {
-        console.log(req.query)
+        //console.log(req.query)
         const { email, key } = req.query;
 
         if (!email || !key) {
@@ -313,7 +313,7 @@ const verify = async (req, res) => {
         user.verified = true;
         await user.save();
 
-        console.log("/users/verify: New user successfully verified")
+        //console.log("/users/verify: New user successfully verified")
         return res.status(200).send({ status: 'OK' });
     }
     catch (err) {
@@ -342,7 +342,7 @@ const uploadS3 = multer({
 
 
 const mediaUpload = async (req, res) => { 
-    console.log(req.file);
+    //console.log(req.file);
     if (!req.session.session_id) {
         const user = await getUserNameAndId(req.cookies.token)
         if (!user) {
@@ -368,7 +368,7 @@ const mediaUpload = async (req, res) => {
 
 const mediaAccess = async (req, res) => {
     try {
-        console.log("mediaAccess receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        //console.log("mediaAccess receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -402,8 +402,8 @@ const mediaAccess = async (req, res) => {
                 return res.status(200).send({ error: true, message: "fail to get image" });
             }
             else {
-                console.log("Media Retrieved");
-                console.log(data);
+                //console.log("Media Retrieved");
+                //console.log(data);
                 const mime = await Mime.findOne({ mediaid: mediaid });
                 const contentType = mime.mimeType;
                 res.set({ 'Content-Type': contentType });
@@ -420,7 +420,7 @@ const mediaAccess = async (req, res) => {
 
 const collectionList = async (req, res) => {
     try {
-        console.log("collectionList receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        //console.log("collectionList receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -445,7 +445,7 @@ const collectionList = async (req, res) => {
 
 const collectionCreate = async (req, res) => {
     try {
-        console.log("collectionCreate receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        //console.log("collectionCreate receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -464,7 +464,7 @@ const collectionCreate = async (req, res) => {
 
         const id = makeId();
         addToRecent({ name: name, id: id })
-        console.log("/collection/create: Created document:" + name, id)
+        //console.log("/collection/create: Created document:" + name, id)
         const ydoc = {
             doc: new Y.Doc(),
             name: name,
@@ -484,7 +484,7 @@ const collectionCreate = async (req, res) => {
 
 const collectionDelete = async (req, res) => {
     try {
-        console.log("collectionDelete receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        //console.log("collectionDelete receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -525,7 +525,7 @@ const collectionDelete = async (req, res) => {
 
 const connect = async (req, res) => {
     try {
-        console.log("apiConnect receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        //console.log("apiConnect receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -560,7 +560,7 @@ const connect = async (req, res) => {
         ydoc.clients.set(clientId, 
             {response: res}
         );
-        console.log("Connecting client " + clientId + " to doc " + id)
+        //console.log("Connecting client " + clientId + " to doc " + id)
 
         res.write("event: sync\ndata: " + Y.encodeStateAsUpdate(ydoc.doc).toString() + "\n\n")
 
@@ -571,7 +571,7 @@ const connect = async (req, res) => {
         })
 
         res.on('close', () => {
-            console.log(`${clientId} Connection closed`);
+            //console.log(`${clientId} Connection closed`);
             let doc = ydocs.get(id);
             if (doc) {
                 doc.clients.delete(clientId)
@@ -590,7 +590,7 @@ const connect = async (req, res) => {
 
 const op = async (req, res) => {
     try {
-        console.log("apiOP receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        //console.log("apiOP receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -608,10 +608,10 @@ const op = async (req, res) => {
             return res.status(200).send({ error: true, message: "Missing document id" });
         }
 
-        console.log("Doc " + id + " receives Update: " + update)
+        //console.log("Doc " + id + " receives Update: " + update)
         const ydoc = ydocs.get(id);
         if (ydoc) {
-            console.log("Found doc " + id)
+            //console.log("Found doc " + id)
             res.send({});
             // console.log("Text before update: " + ydoc.doc.getText().toString())
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
@@ -623,7 +623,7 @@ const op = async (req, res) => {
             addToRecent({ name: ydoc.name, id: id })
             return ydoc.clients.forEach((client, key) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
-                console.log("Sending update to client " + key)
+                //console.log("Sending update to client " + key)
             });
         }
         else {
@@ -640,7 +640,7 @@ const op = async (req, res) => {
 
 const presence = async (req, res) => {
     try {
-        console.log("apiPresence receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        //console.log("apiPresence receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -666,7 +666,7 @@ const presence = async (req, res) => {
 
         const ydoc = ydocs.get(id);
         if (ydoc) {
-            console.log("Found doc " + id)
+            //console.log("Found doc " + id)
             let tmpcursor = ydoc.cursors.get(clientId)
             if (!tmpcursor) {
                 tmpcursor = {name: req.session.name, cursor: {}}
@@ -675,7 +675,7 @@ const presence = async (req, res) => {
             ydoc.cursors.set(clientId, tmpcursor)
             ydoc.clients.forEach((client, key) => {
                 client.response.write("event: presence\ndata: " + JSON.stringify({ session_id: clientId, name: tmpcursor.name, cursor: tmpcursor.cursor }) + "\n\n");
-                console.log("Sending presence to client " + key)
+                //console.log("Sending presence to client " + key)
             });
         }
         else {
@@ -692,7 +692,7 @@ const presence = async (req, res) => {
 
 const search = async (req, res) => {
     try {
-        console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
@@ -727,7 +727,7 @@ const search = async (req, res) => {
 
 const suggest = async (req, res) => {
     try {
-        console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
