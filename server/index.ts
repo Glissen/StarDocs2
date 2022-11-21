@@ -618,7 +618,7 @@ const op = async (req, res) => {
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
 
-            await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
+            // await elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), id);
             // TODO: check error
             res.send({});
             addToRecent({ name: ydoc.name, id: id })
