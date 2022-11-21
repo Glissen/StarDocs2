@@ -472,9 +472,9 @@ const collectionCreate = async (req, res) => {
             cursors: new Map()
         };
         ydocs.set(id, ydoc)
-        await elasticUpdateDoc(name, "", id);
+        res.status(200).send({ id: id })
         
-        return res.status(200).send({ id: id })
+        return elasticUpdateDoc(name, "", id);
         // TODO: check error
     }
     catch (err) {
@@ -509,8 +509,8 @@ const collectionDelete = async (req, res) => {
             doc.clients.forEach(client => {
                 client.response.status(200).send();
             })
-            await elasticDeleteDoc(id)
-            return res.status(200).send({});
+            res.status(200).send({});
+            return await elasticDeleteDoc(id)
         }
         else {
             console.error("/api/delete: Fail to find document with id from db: " + id)
@@ -613,6 +613,7 @@ const op = async (req, res) => {
         const ydoc = ydocs.get(id);
         if (ydoc) {
             //console.log("Found doc " + id)
+            res.send({});
             // console.log("Text before update: " + ydoc.doc.getText().toString())
             Y.applyUpdate(ydoc.doc, Uint8Array.from(update.split(',').map(x => parseInt(x, 10))));
             // console.log("Text after update: " + ydoc.doc.getText().toString())
@@ -621,11 +622,10 @@ const op = async (req, res) => {
             // TODO: check error
 
             addToRecent({ name: ydoc.name, id: id })
-            ydoc.clients.forEach((client, key) => {
+            return ydoc.clients.forEach((client, key) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
                 //console.log("Sending update to client " + key)
             });
-            return res.send({});
         }
         else {
             console.log("Fail to find doc " + id)
@@ -683,7 +683,7 @@ const presence = async (req, res) => {
             console.log("Fail to find doc " + id)
             return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
         }
-        return res.send({});
+        res.send({});
     }
     catch (err) {
         console.error("/api/presence: Error occurred: " + err);
@@ -717,7 +717,7 @@ const search = async (req, res) => {
             ans[index] = {docid: element._id, name: element._source.name, snippet: hl};
         }
 
-        return res.status(200).send(ans);
+        res.status(200).send(ans);
     }
     catch (err) {
         console.error("/index/search: Error occurred: " + err);
@@ -762,7 +762,7 @@ const suggest = async (req, res) => {
             }
         }
         
-        return res.status(200).send(Array.from(ans));
+        res.status(200).send(Array.from(ans));
     }
     catch (err) {
         console.error("/index/suggest: Error occurred: " + err);
