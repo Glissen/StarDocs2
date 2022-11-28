@@ -23,7 +23,7 @@ import * as Y from 'yjs';
 
 dotenv.config();
 const app: express.Application = express();
-const port: number = parseInt(process.env.EXPRESS_PORT);
+const PORT: number = parseInt(process.env.EXPRESS_PORT);
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: '50mb'}));
@@ -839,18 +839,18 @@ app.post("/users/login", login)
 app.post("/users/logout", logout)
 app.get("/users/verify", verify)
 
-app.use("/library", express.static('library'))
+// app.use("/library", express.static('library'))
 
-app.use("/edit", express.static('edit'))
-app.use("/edit/:id", (req, res) => {
-    res.set("Content-Type", "text/html")
-    return res.status(200).send('<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>MP1</title><script defer="defer" src="/edit/static/js/main.3027cd66.js"></script><link href="/edit/static/css/main.2ce06e37.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div><hr><p>This is a test of the CRDT library.</p><p>If the basic functionality of the library works correctly, you should see &quot;Hello <b>World</b>!&quot; above,<br/>preceded by the sequence of CRDT updates that could be sent to the client to construct this string.</p></body></html>');
-})
-app.use("/home", express.static('home', {
-    setHeaders: function (res, path) {
-        res.set('X-CSE356', "6306d31458d8bb3ef7f6bbe1");
-    }
-}))
+// app.use("/edit", express.static('edit'))
+// app.use("/edit/:id", (req, res) => {
+//     res.set("Content-Type", "text/html")
+//     return res.status(200).send('<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>MP1</title><script defer="defer" src="/edit/static/js/main.3027cd66.js"></script><link href="/edit/static/css/main.2ce06e37.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div><hr><p>This is a test of the CRDT library.</p><p>If the basic functionality of the library works correctly, you should see &quot;Hello <b>World</b>!&quot; above,<br/>preceded by the sequence of CRDT updates that could be sent to the client to construct this string.</p></body></html>');
+// })
+// app.use("/home", express.static('home', {
+//     setHeaders: function (res, path) {
+//         res.set('X-CSE356', "6306d31458d8bb3ef7f6bbe1");
+//     }
+// }))
 
 
 
@@ -858,11 +858,11 @@ app.use("/home", express.static('home', {
 db.on('error', console.error.bind(console, 'MongoDB connection error: '))
 
 // listen on port
-app.listen(80, (err?) => {
+app.listen(PORT, (err?) => {
     if (err) {
         return console.error(err);
     }
-    return console.log(`server is listening on ${port}`);
+    return console.log(`Server is listening on ${PORT}`);
 });
 
 const interval = setInterval(function() {
