@@ -28,8 +28,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
-// app.use(upload.array())
-// app.use(express.static('public'));
 app.use(bodyParser.raw({
     type: ['image/png', 'image/jpeg'],
     limit: '10mb'
@@ -65,31 +63,16 @@ const makeId = () => {
 
 const { Client } = require('@elastic/elasticsearch')
 const elasticClient = new Client({
-    node: 'http://localhost:9200'
+    node: 'http://new.renge.io:9200'
 })
 
 const bulkUpdate = async() => {
-    //let temp = [];
     ydocs.forEach((ydoc, key) => {
         if (ydoc.updated) {
             ydoc.updated = false;
-            // temp.push({ index: { _index: "docs", _id: key }})
-            // temp.push({ content: ydoc.doc.getText(), name: ydoc.name })
             elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), key);
         }
     })
-    // const result = await elasticClient.helpers.bulk({
-    //     datasource: temp,
-    //     onDocument (doc) {
-    //         return {
-    //             index: { _index: "docs", _id: doc.id },
-    //             name: 
-    //             content: doc.content,
-
-
-    //         }
-    //     }
-    // })
 
 }
 
@@ -102,12 +85,10 @@ const elasticCreateDoc = async(name: string) => {
         },
         refresh: true,      // true || 'wait_for'
     });
-    //await elasticClient.indices.refresh({ index: 'docs' })
     return result;
 }
 
 const elasticUpdateDoc = async(name: string, text: string, id: string) => {
-    // const result = await elasticClient.index({
     elasticClient.index({
         index: 'docs',
         id: id,
@@ -117,20 +98,15 @@ const elasticUpdateDoc = async(name: string, text: string, id: string) => {
         },
         refresh: true,      // true || 'wait_for'
     });
-    //await elasticClient.indices.refresh({ index: 'docs' })
-    // return result;
 }
 
 const elasticDeleteDoc = async(id: string) => {
-    // const result = await elasticClient.delete({
     elasticClient.delete({
         index: 'docs',
         id: id,
         type: '_doc',
         //refresh: "wait_for",      // true || 'wait_for'
     });
-    //await elasticClient.indices.refresh({ index: 'docs' })
-    // return result;
 }
 
 const elasticSearch = async(query: string) => {
