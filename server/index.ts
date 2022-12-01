@@ -73,6 +73,7 @@ const bulkUpdate = async() => {
             elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), key);
         }
     })
+    elasticRefresh();
 }
 
 // const bulkUpdate = async() => {
@@ -114,7 +115,13 @@ const elasticUpdateDoc = async(name: string, text: string, id: string) => {
             name: name,
             content: text,
         },
-        refresh: true,      // true || 'wait_for'
+        //refresh: true,      // true || 'wait_for'
+    });
+}
+
+const elasticRefresh = async() => {
+    elasticClient.refresh({
+        index: 'docs'
     });
 }
 
