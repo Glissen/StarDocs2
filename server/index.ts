@@ -66,33 +66,33 @@ const elasticClient = new Client({
     node: 'http://new.renge.io:9200'
 })
 
-// const bulkUpdate = async() => {
-//     ydocs.forEach((ydoc, key) => {
-//         if (ydoc.updated) {
-//             ydoc.updated = false;
-//             elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), key);
-//         }
-//     })
-// }
-
 const bulkUpdate = async() => {
-    let datasource = [];
     ydocs.forEach((ydoc, key) => {
         if (ydoc.updated) {
             ydoc.updated = false;
-            datasource.push({ id: key, name: ydoc.name, content: ydoc.doc.getText() })
-        }
-    })
-    await elasticClient.helpers.bulk({
-        datasource: datasource,
-        onDocument (doc) {
-            return {
-                index: { _index: 'docs', _id: doc.id },
-                doc: { name: doc.name, content: doc.content }
-            }
+            elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), key);
         }
     })
 }
+
+// const bulkUpdate = async() => {
+//     let datasource = [];
+//     ydocs.forEach((ydoc, key) => {
+//         if (ydoc.updated) {
+//             ydoc.updated = false;
+//             datasource.push({ id: key, name: ydoc.name, content: ydoc.doc.getText() })
+//         }
+//     })
+//     await elasticClient.helpers.bulk({
+//         datasource: datasource,
+//         onDocument (doc) {
+//             return {
+//                 index: { _index: 'docs', _id: doc.id },
+//                 doc: { name: doc.name, content: doc.content }
+//             }
+//         }
+//     })
+// }
 
 const elasticCreateDoc = async(name: string) => {
     const result = await elasticClient.index({
@@ -861,7 +861,7 @@ app.listen(PORT, (err?) => {
 
 const interval = setInterval(function() {
     bulkUpdate();
-}, 2000);
+}, 1500);
 
 
 type document = {
