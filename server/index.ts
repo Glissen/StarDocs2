@@ -861,7 +861,7 @@ app.listen(PORT, (err?) => {
 
 const interval = setInterval(function() {
     bulkUpdate();
-}, 1000);
+}, 2000);
 
 
 type document = {
