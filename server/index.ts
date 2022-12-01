@@ -120,7 +120,7 @@ const elasticUpdateDoc = async(name: string, text: string, id: string) => {
 }
 
 const elasticRefresh = async() => {
-    elasticClient.refresh({
+    elasticClient.indices.refresh({
         index: 'docs'
     });
 }
