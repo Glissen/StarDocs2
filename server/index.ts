@@ -259,7 +259,7 @@ const mediaAccess = async (req, res) => {
 
 const collectionList = async (req, res) => {
     try {
-        // console.log("collectionList receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
+        console.log("collectionList receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
             if (!user) {
