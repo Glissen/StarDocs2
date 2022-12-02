@@ -328,15 +328,17 @@ const collectionCreate = async (req, res) => {
                 url = "http://localhost:4002/collection/create";
         }
 
+        res.status(200).send({ id: id });
+
         const response = await axios.post(url, {
             name: name,
             id: id
         })
 
-        if (response.status === 200) {
-            return res.status(200).send({ id: id });
+        if (response.status !== 200) {
+            console.error("/collection/create: upstream failed");
         }
-        return res.status(200).send({ error: true, message: "/collection/create: upstream failed" });
+        return;
         // TODO: check error
     }
     catch (err) {
