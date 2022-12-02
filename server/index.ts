@@ -150,7 +150,7 @@ const elasticSuggest = async(query: string) => {
 
 const getUserNameAndId = async (cookie) => {
     try {
-        const result = await axios.post('http://127.0.0.1:4001/users/getUserNameAndId', {
+        const result = await axios.post('http://10.9.11.55:4001/users/getUserNameAndId', {
             cookie: cookie
         })
         return { name: result.data.name, id: result.data.id }
