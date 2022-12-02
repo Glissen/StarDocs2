@@ -174,6 +174,8 @@ const getUserNameAndId = async (cookie) => {
         const result = await axios.post('http://10.9.11.55:4001/users/getUserNameAndId', {
             cookie: cookie
         })
+        console.log("/getusernameandid result: ");
+        console.log(result);
         if (result.data.name && result.data.id)
             return { name: result.data.name, id: result.data.id }
         else 
@@ -267,6 +269,7 @@ const connect = async (req, res) => {
         console.log("apiConnect receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
         if (!req.session.session_id) {
             const user = await getUserNameAndId(req.cookies.token)
+            console.log("/connect user: " + user);
             if (!user) {
                 console.error("/api/connect: Unauthorized user")
                 return res.status(200).send({ error: true, message: "Unauthourized user" });
