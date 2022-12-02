@@ -89,33 +89,6 @@ const elasticClient = new Client({
 //     return result;
 // }
 
-const elasticUpdateDoc = async(name: string, text: string, id: string) => {
-    elasticClient.index({
-        index: 'docs',
-        id: id,
-        document: {
-            name: name,
-            content: text,
-        },
-        //refresh: true,      // true || 'wait_for'
-    });
-}
-
-const elasticRefresh = async() => {
-    elasticClient.indices.refresh({
-        index: 'docs'
-    });
-}
-
-const elasticDeleteDoc = async(id: string) => {
-    elasticClient.delete({
-        index: 'docs',
-        id: id,
-        type: '_doc',
-        //refresh: "wait_for",      // true || 'wait_for'
-    });
-}
-
 const elasticSearch = async(query: string) => {
     return await elasticClient.search({
         index: 'docs',

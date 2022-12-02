@@ -40,12 +40,6 @@ const makeId = () => {
     return ID;
 }
 
-const { Client } = require('@elastic/elasticsearch')
-const elasticClient = new Client({
-    node: 'http://new.renge.io:9200'
-})
-
-
 const getUserNameAndId = async (req, res) => {
     try {
         const cookie = req.body.cookie;
