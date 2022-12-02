@@ -319,13 +319,13 @@ const collectionCreate = async (req, res) => {
         let url = "";
         switch (rand) {
             case 0:
-                url = "http://localhost:4002/collection/create";
+                url = "http://10.9.11.81:4002/collection/create";
                 break;
             case 1:
-                url = "http://localhost:4002/collection/create";
+                url = "http://10.9.11.81:4002/collection/create";
                 break;
             default:
-                url = "http://localhost:4002/collection/create";
+                url = "http://10.9.11.81:4002/collection/create";
         }
 
         res.status(200).send({ id: id });
@@ -377,13 +377,13 @@ const collectionDelete = async (req, res) => {
             let url = "";
             switch (id[0]) {
                 case 'a':
-                    url = "http://localhost:4002/collection/create";
+                    url = "http://10.9.11.81:4002/collection/create";
                     break;
                 case 'b':
-                    url = "http://localhost:4002/collection/create";
+                    url = "http://10.9.11.81:4002/collection/create";
                     break;
                 default:
-                    url = "http://localhost:4002/collection/create";
+                    url = "http://10.9.11.81:4002/collection/create";
             }
             return await axios.post(url, {
                 id: id
