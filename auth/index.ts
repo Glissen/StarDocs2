@@ -223,7 +223,7 @@ app.post("/users/signup", signup)
 app.post("/users/login", login)
 app.post("/users/logout", logout)
 app.get("/users/verify", verify)
-app.get("/users/getUserNameAndId", getUserNameAndId)
+app.post("/users/getUserNameAndId", getUserNameAndId)
 
 // db
 db.on('error', console.error.bind(console, 'MongoDB connection error: '))
