@@ -177,13 +177,13 @@ const elasticSuggest = async(query: string) => {
 
 const getUserNameAndId = async (cookie) => {
     try {
-        const result = await axios.post('http://localhost:4001/getUserNameAndId', {
+        const result = await axios.post('http://localhost:4001/users/getUserNameAndId', {
             cookie: cookie
         })
         return { name: result.data.name, id: result.data.id }
     }
     catch (err) {
-        console.log("/getUserNameAndId: " + err);
+        console.log("/users/getUserNameAndId: " + err);
         return null;
     }
 }
