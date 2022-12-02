@@ -174,7 +174,10 @@ const getUserNameAndId = async (cookie) => {
         const result = await axios.post('http://10.9.11.55:4001/users/getUserNameAndId', {
             cookie: cookie
         })
-        return { name: result.data.name, id: result.data.id }
+        if (result.data.name && result.data.id)
+            return { name: result.data.name, id: result.data.id }
+        else 
+            return null;
     }
     catch (err) {
         console.log("/users/getUserNameAndId: " + err);
