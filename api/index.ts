@@ -2,7 +2,6 @@ import express from 'express';
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import dotenv from 'dotenv'
-import db from './db'
 import session from 'express-session';
 import axios from 'axios';
 
@@ -522,9 +521,6 @@ app.get('/api/connect/:id', connect);
 app.post('/api/connect/:id', connect);
 app.post('/api/op/:id', op);
 app.post('/api/presence/:id', presence)
-
-// db
-db.on('error', console.error.bind(console, 'MongoDB connection error: '))
 
 // listen on port
 app.listen(PORT, (err?) => {
