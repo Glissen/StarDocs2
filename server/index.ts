@@ -349,10 +349,10 @@ const collectionCreate = async (req, res) => {
                 url = "http://localhost:4002/collection/create";
                 break;
             case 1:
-                url = "http://localhost:4003/collection/create";
+                url = "http://localhost:4002/collection/create";
                 break;
             default:
-                url = "http://localhost:4004/collection/create";
+                url = "http://localhost:4002/collection/create";
         }
 
         const response = await axios.post(url, {
@@ -405,10 +405,10 @@ const collectionDelete = async (req, res) => {
                     url = "http://localhost:4002/collection/create";
                     break;
                 case 'b':
-                    url = "http://localhost:4003/collection/create";
+                    url = "http://localhost:4002/collection/create";
                     break;
                 default:
-                    url = "http://localhost:4004/collection/create";
+                    url = "http://localhost:4002/collection/create";
             }
             return await axios.post(url, {
                 id: id
