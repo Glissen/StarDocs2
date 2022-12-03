@@ -76,7 +76,8 @@ const elasticSearch = async(query: string) => {
                 name: {},
                 content: {}
             },
-            type: "plain"
+            type: "plain",
+            fragment_size: 500
         },
         from: 0,
         size: 10,
@@ -258,6 +259,7 @@ const collectionList = async (req, res) => {
     }
 }
 
+let order = 0;
 const collectionCreate = async (req, res) => {
     try {
         console.log("collectionCreate receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
@@ -277,13 +279,13 @@ const collectionCreate = async (req, res) => {
             res.status(200).json({ error: true, message: "Missing document name" });
         }
 
-        
-        const rand = String.fromCharCode(97 + Math.floor(Math.random() * 8));
-        const id = rand + makeId();
+        //const rand = String.fromCharCode(97 + Math.floor(Math.random() * 8));
+        const id = String.fromCharCode(97 + (order % 8)) + makeId();
+        order++;
         addToRecent({ name: name, id: id })
 
         let url = "";
-        switch (rand) {
+        switch (id[0]) {
             case 'a':
                 url = "http://10.9.11.81:4000/collection/create";
                 break;
