@@ -22,11 +22,6 @@ app.use(bodyParser.raw({
     limit: '10mb'
 }))
 
-// app.use(cookieSession({
-//     name: 'session',
-//     keys: ["aveuCJmh0xCwdUg69gmWMSEALHizb2IENAAKZApMNeFsP9FqgI54GpcuAWHjNfCe"],
-//     maxAge: 60 * 60 * 1000,
-// }))
 app.use(session({
     secret: "aveuCJmh0xCwdUg69gmWMSEALHizb2IENAAKZApMNeFsP9FqgI54GpcuAWHjNfCe",
     saveUninitialized: false,
@@ -61,37 +56,6 @@ const bulkUpdate = async() => {
     elasticRefresh();
 }
 
-// const bulkUpdate = async() => {
-//     let datasource = [];
-//     ydocs.forEach((ydoc, key) => {
-//         if (ydoc.updated) {
-//             ydoc.updated = false;
-//             datasource.push({ id: key, name: ydoc.name, content: ydoc.doc.getText() })
-//         }
-//     })
-//     await elasticClient.helpers.bulk({
-//         datasource: datasource,
-//         onDocument (doc) {
-//             return {
-//                 index: { _index: 'docs', _id: doc.id },
-//                 doc: { name: doc.name, content: doc.content }
-//             }
-//         }
-//     })
-// }
-
-const elasticCreateDoc = async(name: string) => {
-    const result = await elasticClient.index({
-        index: 'docs',
-        document: {
-            name: name,
-            content: '',
-        },
-        refresh: true,      // true || 'wait_for'
-    });
-    return result;
-}
-
 const elasticUpdateDoc = async(name: string, text: string, id: string) => {
     elasticClient.index({
         index: 'docs',
@@ -119,64 +83,6 @@ const elasticDeleteDoc = async(id: string) => {
     });
 }
 
-const elasticSearch = async(query: string) => {
-    return await elasticClient.search({
-        index: 'docs',
-        query: {
-            multi_match: {
-                query: query,
-                fields: [
-                    "name",
-                    "content"
-                ]
-            }
-        },
-        highlight: {
-            fields: {
-                name: {},
-                content: {}
-            }
-        },
-        from: 0,
-        size: 10,
-        _source: [
-            "name"
-        ]
-    });
-}
-
-const elasticSuggest = async(query: string) => {
-    const result = await elasticClient.search({
-        query: {
-            bool: {
-                should: [
-                    {
-                        match_phrase_prefix: {
-                            content: query
-                        }
-                    },
-                    {
-                        match_phrase_prefix: {
-                            name: query
-                        }
-                    }
-                ]
-            }
-        },
-        highlight: {
-            boundary_scanner: "word",
-            fields: {
-                "content": {},
-                "name": {}
-            }
-        },
-        from: 0,
-        size: 10,
-        _source: [""]
-    })
-    return result;
-}
-
 const getUserNameAndId = async (cookie) => {
     try {
         const result = await axios.post('http://10.9.11.55:4001/users/getUserNameAndId', {
@@ -197,17 +103,6 @@ const getUserNameAndId = async (cookie) => {
 
 const collectionCreate = async (req, res) => {
     try {
-        // console.log("collectionCreate receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
-        // if (!req.session.session_id) {
-        //     const user = await getUserNameAndId(req.cookies.token)
-        //     if (!user) {
-        //         console.error("/collection/create: Unauthorized user")
-        //         return res.status(200).send({ error: true, message: "Unauthourized user" });
-        //     }
-        //     req.session.session_id = makeId();
-        //     req.session.name = user.name;
-        // }
-        
         const { name, id } = req.body;
         if (!name || !id) {
             console.error("/collection/create: Missing document name or id")
@@ -237,15 +132,6 @@ const collectionCreate = async (req, res) => {
 const collectionDelete = async (req, res) => {
     try {
         console.log("collectionDelete receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
-        // if (!req.session.session_id) {
-        //     const user = await getUserNameAndId(req.cookies.token)
-        //     if (!user) {
-        //         console.error("/collection/delete: Unauthorized user")
-        //         return res.status(200).send({ error: true, message: "Unauthourized user" });
-        //     }
-        //     req.session.session_id = makeId();
-        //     req.session.name = user.name;
-        // }
         
         const { id } = req.body;
         if (!id) {
@@ -446,93 +332,11 @@ const presence = async (req, res) => {
     }
 }
 
-const search = async (req, res) => {
-    try {
-        //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
-        if (!req.session.session_id) {
-            const user = await getUserNameAndId(req.cookies.token)
-            if (!user) {
-                console.error("/index/search: Unauthorized user")
-                return res.status(200).send({ error: true, message: "Unauthourized user" });
-            }
-            req.session.session_id = makeId();
-            req.session.name = user.name;
-        }
-
-        const { q } = req.query;
-
-        const result = await elasticSearch(q);
-
-        const size = result.hits.hits.length;
-        const ans = new Array(size);
-
-        for (let index = 0; index < size; index++) {
-            const element = result.hits.hits[index];
-            const hl = element.highlight.name ? element.highlight.name[0] : element.highlight.content[0];
-            ans[index] = {docid: element._id, name: element._source.name, snippet: hl};
-        }
-
-        res.status(200).send(ans);
-    }
-    catch (err) {
-        console.error("/index/search: Error occurred: " + err);
-        return res.status(200).send({ error: true, message: "An error has occurred" });
-    }
-}
-
-const suggest = async (req, res) => {
-    try {
-        //console.log("search receive request: \n" + JSON.stringify(req.session) + "\n" + req.cookies.token)
-        if (!req.session.session_id) {
-            const user = await getUserNameAndId(req.cookies.token)
-            if (!user) {
-                console.error("/index/suggest: Unauthorized user")
-                return res.status(200).send({ error: true, message: "Unauthourized user" });
-            }
-            req.session.session_id = makeId();
-            req.session.name = user.name;
-        }
-
-        const { q } = req.query;
-
-        const result = await elasticSuggest(q);
-
-        const size = result.hits.hits.length;
-        const ans = new Set();
-
-        for (let index = 0; index < size; index++) {
-            const element = result.hits.hits[index];
-            if (element.highlight.name) {
-                for (let i = 0; i < element.highlight.name.length; i ++) {
-                    let word = element.highlight.name[i];
-                    ans.add(word.slice(4, -5).toLowerCase());
-                }
-            }
-            if (element.highlight.content) {
-                for (let i = 0; i < element.highlight.content.length; i ++) {
-                    let word = element.highlight.content[i];
-                    ans.add(word.slice(4, -5).toLowerCase());
-                }
-            }
-        }
-        
-        res.status(200).send(Array.from(ans));
-    }
-    catch (err) {
-        console.error("/index/suggest: Error occurred: " + err);
-        return res.status(200).send({ error: true, message: "An error has occurred" });
-    }
-}
-
-app.get('/index/search', search);
-app.get('/index/suggest', suggest);
-
 app.post('/collection/create', collectionCreate);
 app.post('/collection/delete', collectionDelete);
 //app.get('/collection/list', collectionList);
 
 app.get('/api/connect/:id', connect);
-app.post('/api/connect/:id', connect);
 app.post('/api/op/:id', op);
 app.post('/api/presence/:id', presence)
 
