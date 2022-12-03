@@ -8,6 +8,7 @@ import axios from 'axios';
 
 import S3 from 'aws-sdk/clients/s3'
 import session from 'express-session';
+import MongoStore from 'connect-mongo'
 
 const multer = require('multer')
 const multerS3 = require('multer-s3')
@@ -28,9 +29,9 @@ app.use(bodyParser.raw({
 app.use(session({
     secret: "aveuCJmh0xCwdUg69gmWMSEALHizb2IENAAKZApMNeFsP9FqgI54GpcuAWHjNfCe",
     saveUninitialized: false,
-    resave: false
+    resave: false,
+    store: MongoStore.create({ mongoUrl: process.env.SESSION_MONGO_URL})
 }));
-
 
 const recentDocument = Array<document>();
 

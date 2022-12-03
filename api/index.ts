@@ -4,6 +4,7 @@ import bodyParser from 'body-parser'
 import dotenv from 'dotenv'
 import session from 'express-session';
 import axios from 'axios';
+import MongoStore from 'connect-mongo'
 
 require('events').EventEmitter.defaultMaxListeners = 64;
 
@@ -20,10 +21,17 @@ app.use(bodyParser.raw({
     type: ['image/png', 'image/jpeg'],
     limit: '10mb'
 }))
+
+// app.use(cookieSession({
+//     name: 'session',
+//     keys: ["aveuCJmh0xCwdUg69gmWMSEALHizb2IENAAKZApMNeFsP9FqgI54GpcuAWHjNfCe"],
+//     maxAge: 60 * 60 * 1000,
+// }))
 app.use(session({
     secret: "aveuCJmh0xCwdUg69gmWMSEALHizb2IENAAKZApMNeFsP9FqgI54GpcuAWHjNfCe",
     saveUninitialized: false,
-    resave: false
+    resave: false,
+    store: MongoStore.create({ mongoUrl: process.env.SESSION_MONGO_URL})
 }));
 
 
@@ -203,7 +211,7 @@ const collectionCreate = async (req, res) => {
         const { name, id } = req.body;
         if (!name || !id) {
             console.error("/collection/create: Missing document name or id")
-            res.status(400).json({ error: true, message: "Missing document name or id" });
+            return res.status(400).json({ error: true, message: "Missing document name or id" });
         }
 
         //const id = makeId();
