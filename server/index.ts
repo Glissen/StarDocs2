@@ -10,6 +10,11 @@ import S3 from 'aws-sdk/clients/s3'
 import session from 'express-session';
 import MongoStore from 'connect-mongo'
 
+import cluster from 'node:cluster';
+//import http from 'node:http';
+import { cpus } from 'node:os';
+import process from 'node:process';
+
 const multer = require('multer')
 const multerS3 = require('multer-s3')
 
@@ -475,12 +480,27 @@ app.get('/media/access/:mediaid', mediaAccess);
 db.on('error', console.error.bind(console, 'MongoDB connection error: '))
 
 // listen on port
-app.listen(PORT, (err?) => {
-    if (err) {
-        return console.error(err);
+const numCPUs = cpus().length;
+
+if (cluster.isPrimary) {
+    console.log("Primary ${process.pid} is running");
+    for (let i = 0; i < numCPUs; i++) {
+        cluster.fork();
     }
-    return console.log(`Server is listening on ${PORT}`);
-});
+
+    cluster.on('exit', (worker, code, signal) => {
+        console.log(`worker ${worker.process.pid} died`);
+    })
+}
+else {
+    app.listen(PORT, (err?) => {
+        if (err) {
+            return console.error(err);
+        }
+        return console.log(`Server is listening on ${PORT}`);
+    });
+    console.log(`Worker ${process.pid} started`);
+}
 
 type document = {
     name: string,
