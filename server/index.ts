@@ -82,6 +82,17 @@ const elasticSearch = async(query: string) => {
                             fields: [
                                 "name",
                                 "content"
+                            ],
+                            operator: "and",
+                            type: "phrase_prefix"
+                        }
+                    },
+                    {
+                        multi_match: {
+                            query: query,
+                            fields: [
+                                "name",
+                                "content"
                             ]
                         }
                     }
@@ -93,7 +104,7 @@ const elasticSearch = async(query: string) => {
                 name: {},
                 content: {}
             },
-            type: "plain"
+            fragment_size: 150
         
         },
         from: 0,
