@@ -93,7 +93,8 @@ const elasticSearch = async(query: string) => {
                 name: {},
                 content: {}
             },
-            fragment_size: 250
+            type: "plain"
+        
         },
         from: 0,
         size: 10,
