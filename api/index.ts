@@ -6,6 +6,11 @@ import session from 'express-session';
 import axios from 'axios';
 import MongoStore from 'connect-mongo'
 
+import cluster from 'node:cluster';
+//import http from 'node:http';
+import { cpus } from 'node:os';
+import process from 'node:process';
+
 require('events').EventEmitter.defaultMaxListeners = 64;
 
 import * as Y from 'yjs';
@@ -340,13 +345,28 @@ app.get('/api/connect/:id', connect);
 app.post('/api/op/:id', op);
 app.post('/api/presence/:id', presence)
 
+
+const numCPUs = cpus().length;
 // listen on port
-app.listen(PORT, (err?) => {
-    if (err) {
-        return console.error(err);
+if (cluster.isPrimary) {
+    console.log("Primary ${process.pid} is running");
+    for (let i = 0; i < numCPUs; i++) {
+        cluster.fork();
     }
-    return console.log(`Server is listening on ${PORT}`);
-});
+
+    cluster.on('exit', (worker, code, signal) => {
+        console.log(`worker ${worker.process.pid} died`);
+    })
+}
+else {
+    app.listen(PORT, (err?) => {
+        if (err) {
+            return console.error(err);
+        }
+        return console.log(`Server is listening on ${PORT}`);
+    });
+    console.log(`Worker ${process.pid} started`);
+}
 
 const interval = setInterval(function() {
     bulkUpdate();
