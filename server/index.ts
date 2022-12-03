@@ -335,7 +335,7 @@ const collectionCreate = async (req, res) => {
                 url = "http://10.9.11.108:4002/collection/create";
                 break;
             default:
-                url = "http://10.9.11.108:4004/collection/create";
+                url = "http://10.9.11.108:4003/collection/create";
         }
 
         res.status(200).send({ id: id });
@@ -407,7 +407,7 @@ const collectionDelete = async (req, res) => {
                     url = "http://10.9.11.108:4002/collection/create";
                     break;
                 default:
-                    url = "http://10.9.11.108:4004/collection/create";
+                    url = "http://10.9.11.108:4003/collection/create";
             }
             return await axios.post(url, {
                 id: id
