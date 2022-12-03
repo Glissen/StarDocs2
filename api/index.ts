@@ -349,7 +349,7 @@ app.post('/api/presence/:id', presence)
 const numCPUs = cpus().length;
 // listen on port
 if (cluster.isPrimary) {
-    console.log("Primary ${process.pid} is running");
+    console.log(`Primary ${process.pid} is running`);
     for (let i = 0; i < numCPUs; i++) {
         cluster.fork();
     }
