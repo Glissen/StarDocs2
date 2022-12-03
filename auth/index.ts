@@ -11,6 +11,7 @@ import Token from './models/token-model'
 import auth from './auth';
 
 import session from 'express-session';
+import MongoStore from 'connect-mongo';
 
 require('events').EventEmitter.defaultMaxListeners = 64;
 
@@ -28,7 +29,8 @@ app.use(bodyParser.raw({
 app.use(session({
     secret: "aveuCJmh0xCwdUg69gmWMSEALHizb2IENAAKZApMNeFsP9FqgI54GpcuAWHjNfCe",
     saveUninitialized: false,
-    resave: false
+    resave: false,
+    store: MongoStore.create({ mongoUrl: process.env.SESSION_MONGO_URL})
 }));
 
 const makeId = () => {
