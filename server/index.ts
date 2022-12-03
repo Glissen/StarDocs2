@@ -277,7 +277,7 @@ const collectionCreate = async (req, res) => {
         }
 
         
-        const rand = String.fromCharCode(65 + Math.floor(Math.random() * 4));
+        const rand = String.fromCharCode(97 + Math.floor(Math.random() * 4));
         const id = rand + makeId();
         addToRecent({ name: name, id: id })
 
