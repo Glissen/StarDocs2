@@ -104,8 +104,8 @@ const elasticSearch = async(query: string) => {
                 name: {},
                 content: {}
             },
-            fragment_size: 150
-        
+            fragment_size: 150,
+            type: "plain"
         },
         from: 0,
         size: 10,
@@ -322,8 +322,20 @@ const collectionCreate = async (req, res) => {
             case 'c':
                 url = "http://10.9.11.81:4002/collection/create";
                 break;
-            default:
+            case 'd':
                 url = "http://10.9.11.81:4003/collection/create";
+                break;
+            case 'e':
+                url = "http://10.9.11.108:4000/collection/create";
+                break;
+            case 'f':
+                url = "http://10.9.11.108:4001/collection/create";
+                break;
+            case 'g':
+                url = "http://10.9.11.108:4002/collection/create";
+                break;
+            default:
+                url = "http://10.9.11.108:4004/collection/create";
         }
 
         res.status(200).send({ id: id });
@@ -382,8 +394,20 @@ const collectionDelete = async (req, res) => {
                 case 'c':
                     url = "http://10.9.11.81:4002/collection/create";
                     break;
-                default:
+                case 'd':
                     url = "http://10.9.11.81:4003/collection/create";
+                    break;
+                case 'e':
+                    url = "http://10.9.11.108:4000/collection/create";
+                    break;
+                case 'f':
+                    url = "http://10.9.11.108:4001/collection/create";
+                    break;
+                case 'g':
+                    url = "http://10.9.11.108:4002/collection/create";
+                    break;
+                default:
+                    url = "http://10.9.11.108:4004/collection/create";
             }
             return await axios.post(url, {
                 id: id
