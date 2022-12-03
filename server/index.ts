@@ -63,11 +63,28 @@ const elasticSearch = async(query: string) => {
     return await elasticClient.search({
         index: 'docs',
         query: {
-            multi_match: {
-                query: query,
-                fields: [
-                    "name",
-                    "content"
+            bool: {
+                must: [
+                    {
+                        multi_match: {
+                            query: query,
+                            fields: [
+                                "name",
+                                "content"
+                            ],
+                            operator: "and",
+                            type: "phrase"
+                        }
+                    },
+                    {
+                        multi_match: {
+                            query: query,
+                            fields: [
+                                "name",
+                                "content"
+                            ]
+                        }
+                    }
                 ]
             }
         },
@@ -75,7 +92,8 @@ const elasticSearch = async(query: string) => {
             fields: {
                 name: {},
                 content: {}
-            }
+            },
+            fragment_size: 250
         },
         from: 0,
         size: 10,
