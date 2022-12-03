@@ -276,21 +276,24 @@ const collectionCreate = async (req, res) => {
             res.status(200).json({ error: true, message: "Missing document name" });
         }
 
-        const abc = 'abc';
-        const rand = Math.floor(Math.random() * 3);
-        const id = abc[rand] + makeId();
+        
+        const rand = String.fromCharCode(65 + Math.floor(Math.random() * 4));
+        const id = rand + makeId();
         addToRecent({ name: name, id: id })
 
         let url = "";
         switch (rand) {
-            case 0:
+            case 'a':
                 url = "http://10.9.11.81:4000/collection/create";
                 break;
-            case 1:
+            case 'b':
                 url = "http://10.9.11.81:4001/collection/create";
                 break;
-            default:
+            case 'c':
                 url = "http://10.9.11.81:4002/collection/create";
+                break;
+            default:
+                url = "http://10.9.11.81:4003/collection/create";
         }
 
         res.status(200).send({ id: id });
@@ -346,8 +349,11 @@ const collectionDelete = async (req, res) => {
                 case 'b':
                     url = "http://10.9.11.81:4001/collection/create";
                     break;
-                default:
+                case 'c':
                     url = "http://10.9.11.81:4002/collection/create";
+                    break;
+                default:
+                    url = "http://10.9.11.81:4003/collection/create";
             }
             return await axios.post(url, {
                 id: id
