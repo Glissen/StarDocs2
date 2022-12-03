@@ -284,10 +284,10 @@ const collectionCreate = async (req, res) => {
         let url = "";
         switch (rand) {
             case 0:
-                url = "http://10.9.11.81:4002/collection/create";
+                url = "http://10.9.11.81:4000/collection/create";
                 break;
             case 1:
-                url = "http://10.9.11.81:4002/collection/create";
+                url = "http://10.9.11.81:4001/collection/create";
                 break;
             default:
                 url = "http://10.9.11.81:4002/collection/create";
@@ -341,10 +341,10 @@ const collectionDelete = async (req, res) => {
             let url = "";
             switch (id[0]) {
                 case 'a':
-                    url = "http://10.9.11.81:4002/collection/create";
+                    url = "http://10.9.11.81:4000/collection/create";
                     break;
                 case 'b':
-                    url = "http://10.9.11.81:4002/collection/create";
+                    url = "http://10.9.11.81:4001/collection/create";
                     break;
                 default:
                     url = "http://10.9.11.81:4002/collection/create";
