@@ -67,7 +67,8 @@ const elasticUpdateSettings = async() => {
     elasticClient.indices.putSettings({
         index: 'docs',
         settings: {
-            number_of_replicas: 0
+            number_of_replicas: 0,
+            refresh_interval: 5
         }
     })
 }
