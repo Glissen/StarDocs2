@@ -77,6 +77,9 @@ const elasticUpdateSettings = async() => {
                 durability: 'async',
                 flush_threshold_size: '10240mb',
                 sync_interval: '600s'
+            },
+            highlight: {
+                max_analyzed_offset: 10000000
             }
         }
     })
@@ -112,7 +115,8 @@ const elasticSearch = async(query: string) => {
                 content: {}
                 //main_content: {}
             },
-            fragment_size: 0
+            fragment_size: 0,
+            max_analyzed_offset: 999999
         },
         from: 0,
         size: 10,
