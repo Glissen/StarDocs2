@@ -280,7 +280,7 @@ const collectionCreate = async (req, res) => {
         }
 
         //const rand = String.fromCharCode(97 + Math.floor(Math.random() * 8));
-        const id = String.fromCharCode(97 + (order % 8)) + makeId();
+        const id = String.fromCharCode(97 + (order % 12)) + makeId();
         order++;
         addToRecent({ name: name, id: id })
 
@@ -307,8 +307,20 @@ const collectionCreate = async (req, res) => {
             case 'g':
                 url = "http://10.9.11.108:4002/collection/create";
                 break;
-            default:
+            case 'h':
                 url = "http://10.9.11.108:4003/collection/create";
+                break;
+            case 'i':
+                url = "http://10.9.11.181:4000/collection/create";
+                break;
+            case 'j':
+                url = "http://10.9.11.181:4001/collection/create";
+                break;
+            case 'k':
+                url = "http://10.9.11.181:4002/collection/create";
+                break;
+            default:
+                url = "http://10.9.11.181:4003/collection/create";
         }
 
         res.status(200).send({ id: id });
@@ -379,8 +391,20 @@ const collectionDelete = async (req, res) => {
                 case 'g':
                     url = "http://10.9.11.108:4002/collection/create";
                     break;
-                default:
+                case 'h':
                     url = "http://10.9.11.108:4003/collection/create";
+                    break;
+                case 'i':
+                    url = "http://10.9.11.181:4000/collection/create";
+                    break;
+                case 'j':
+                    url = "http://10.9.11.181:4001/collection/create";
+                    break;
+                case 'k':
+                    url = "http://10.9.11.181:4002/collection/create";
+                    break;
+                default:
+                    url = "http://10.9.11.181:4003/collection/create";
             }
             return await axios.post(url, {
                 id: id
