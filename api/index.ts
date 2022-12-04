@@ -41,18 +41,40 @@ const makeId = () => {
     return ID;
 }
 
-const shard = Math.random() > 0.5 ? "http://10.9.11.182:9200" : "http://10.9.11.197:9200";
-console.log("Serving to shard: " + shard);
+//const shard = Math.random() > 0.5 ? "http://10.9.11.182:9200" : "http://10.9.11.197:9200";
+//console.log("Serving to shard: " + shard);
 const { Client } = require('@elastic/elasticsearch')
 const elasticClient = new Client({
-    node: shard
+    node: "http://new.renge.io:9200"
 })
 
+// const bulkUpdate = async() => {
+//     ydocs.forEach((ydoc, key) => {
+//         if (ydoc.updated) {
+//             ydoc.updated = false;
+//             elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), key);
+//         }
+//     })
+// }
+
 const bulkUpdate = async() => {
+    let arr = [];
     ydocs.forEach((ydoc, key) => {
         if (ydoc.updated) {
             ydoc.updated = false;
-            elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), key);
+            arr.push({name: ydoc.name, id: key, content: ydoc.doc.getText()})
+        }
+    })
+    await elasticClient.helpers.bulk({
+        datasource: arr,
+        onDocument(doc) {
+            return {
+                index: { _index: "docs", _id: doc.id },
+                document: {
+                    name: doc.name,
+                    content: doc.content
+                }
+            }
         }
     })
 }

@@ -55,13 +55,17 @@ const makeId = () => {
 }
 
 const { Client } = require('@elastic/elasticsearch')
-const elasticClient = new Client({
-    node: 'http://10.9.11.197:9200'
-})
 
-const elasticClient2 = new Client({
-    node: 'http://10.9.11.182:9200'
+const elasticClient = new Client({
+    node: 'http://new.renge.io:9200'
 })
+// const elasticClient = new Client({
+//     node: 'http://10.9.11.197:9200'
+// })
+
+// const elasticClient2 = new Client({
+//     node: 'http://10.9.11.182:9200'
+// })
 
 const elasticUpdateSettings = async() => {
     elasticClient.indices.putSettings({
@@ -103,8 +107,8 @@ const elasticSearch = async(query: string) => {
             "name"
         ]
     }
-    return (Math.random() > 0.5 ? await elasticClient.search(params) : await elasticClient2.search(params));
-    //return await elasticClient.search();
+    //return (Math.random() > 0.5 ? await elasticClient.search(params) : await elasticClient2.search(params));
+    return await elasticClient.search(params);
 }
 
 const elasticSuggest = async(query: string) => {
@@ -129,7 +133,8 @@ const elasticSuggest = async(query: string) => {
         size: 10,
         _source: [""]
     }
-    const result = (Math.random() > 0.5 ? await elasticClient.search(params) : await elasticClient2.search(params));
+    //const result = (Math.random() > 0.5 ? await elasticClient.search(params) : await elasticClient2.search(params));
+    const result = await elasticClient.search(params);
     return result;
 }
 
