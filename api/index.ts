@@ -32,6 +32,16 @@ app.use(session({
 
 const ydocs: Map<string, ydoc> = new Map();
 
+const recentDocument = Array<document>();
+
+const addToRecent = (document: document): void => {
+    const index = recentDocument.findIndex((element) => { return element.id === document.id });
+    if (index !== -1)
+        recentDocument.splice(index, 1);
+    recentDocument.splice(0, 0, document);
+}
+
+
 const makeId = () => {
     let ID = "";
     let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -124,6 +134,14 @@ const getUserNameAndId = async (cookie) => {
     }
 }
 
+const getRecents = async(req, res) => {
+    let response = new Array<document>();
+    for (let i = 0; i < recentDocument.length && i < 10; i++) {
+        response.push(recentDocument[i]);
+    }
+    return res.status(200).send({ docs: response });
+}
+
 const collectionCreate = async (req, res) => {
     try {
         const { name, id } = req.body;
@@ -143,6 +161,7 @@ const collectionCreate = async (req, res) => {
             cursors: new Map()
         };
         ydocs.set(id, ydoc)
+        addToRecent({id: id, name: name, timestamp: Date.now()});
         return res.status(200).send({ id: id })
         // TODO: check error
     }
@@ -166,6 +185,10 @@ const collectionDelete = async (req, res) => {
             doc.clients.forEach(client => {
                 client.response.status(200).send();
             })
+            
+            const index = recentDocument.findIndex((element) => { return element.id === id });
+            if (index !== -1)
+                recentDocument.splice(index, 1);
             res.status(200).send({});
             return await elasticDeleteDoc(id)
         }
@@ -284,10 +307,12 @@ const op = async (req, res) => {
                 client.response.write("event: update\ndata: " + update + "\n\n");
                 // console.log("Sending update to client " + key)
             });
-            return await axios.post('http://194.113.74.13:4000/updateRecent', {
-                id: id,
-                name: ydoc.name
-            });
+
+            addToRecent({id: id, name: ydoc.name, timestamp: Date.now()});
+            // return await axios.post('http://194.113.74.13:4000/updateRecent', {
+            //     id: id,
+            //     name: ydoc.name
+            // });
             // return setTimeout(function(){
             // }, 200);
         }
@@ -358,6 +383,7 @@ const presence = async (req, res) => {
 app.post('/collection/create', collectionCreate);
 app.post('/collection/delete', collectionDelete);
 //app.get('/collection/list', collectionList);
+app.get('/recents', getRecents);
 
 app.get('/api/connect/:id', connect);
 app.post('/api/op/:id', op);
@@ -391,4 +417,10 @@ type client = {
 type cursor = {
     name: string,
     cursor: { index: number, length: number } | {},
+}
+
+type document = {
+    name: string,
+    id: string,
+    timestamp: number
 }

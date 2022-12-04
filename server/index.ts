@@ -9,6 +9,7 @@ import axios from 'axios';
 import S3 from 'aws-sdk/clients/s3'
 import session from 'express-session';
 import MongoStore from 'connect-mongo'
+import { AppStream } from 'aws-sdk';
 
 const multer = require('multer')
 const multerS3 = require('multer-s3')
@@ -33,17 +34,33 @@ app.use(session({
     store: MongoStore.create({ mongoUrl: process.env.SESSION_MONGO_URL})
 }));
 
-const recentDocument = Array<document>();
+//const recentDocument = Array<document>();
 
-const addToRecent = (document: document): void => {
-    const index = recentDocument.findIndex((element) => { return element.id === document.id });
-    if (index === 0) {
-        return
-    }
-    if (index !== -1)
-        recentDocument.splice(index, 1);
-    recentDocument.splice(0, 0, document);
-}
+// const addToRecent = (document: document): void => {
+//     const index = recentDocument.findIndex((element) => { return element.id === document.id });
+//     if (index !== -1)
+//         recentDocument.splice(index, 1);
+//     recentDocument.splice(0, 0, document);
+// }
+
+const apis = ["http://10.9.11.81:4000",
+        "http://10.9.11.81:4001",
+        "http://10.9.11.81:4002",
+        "http://10.9.11.81:4003",
+        "http://10.9.11.108:4000",
+        "http://10.9.11.108:4001",
+        "http://10.9.11.108:4002",
+        "http://10.9.11.108:4003",
+        "http://10.9.11.181:4000",
+        "http://10.9.11.181:4001",
+        "http://10.9.11.181:4002",
+        "http://10.9.11.181:4003",
+        "http://10.9.0.134:4000",
+        "http://10.9.0.134:4001",
+        "http://10.9.0.134:4002",
+        "http://10.9.0.134:4003",
+];
+
 
 const makeId = () => {
     let ID = "";
@@ -300,6 +317,17 @@ const mediaAccess = async (req, res) => {
     }
 }
 
+const getRecents = async() => {
+    let recents = Array<document>();
+        
+    for (let i = 0; i < apis.length; i++) {
+        let response = await axios.get(`${apis[i]}/recents`);
+        if (response.status === 200) {
+            recents.push(response.data.docs);
+        }
+    }
+    return recents;
+}
 
 const collectionList = async (req, res) => {
     try {
@@ -315,12 +343,20 @@ const collectionList = async (req, res) => {
             req.session.session_id = makeId();
             req.session.name = user.name;
         }
-        
-        let response = Array<document>();
-        for (let index = 0; index < recentDocument.length && index < 10; index++) {
-            response.push(recentDocument[index]);
+
+        let recents = await getRecents();
+        recents.sort(function(a, b) {
+            return b.timestamp - a.timestamp;
+        })
+
+        let answers = [];
+        for (let i = 0; i < recents.length && i < 10; i++) {
+            answers.push({
+                id: recents[i].id,
+                name: recents[i].name
+            })
         }
-        return res.status(200).send(response);
+        return res.status(200).send(answers);
     }
     catch (err) {
         console.error("/collection/list: Error occurred: " + err);
@@ -351,7 +387,7 @@ const collectionCreate = async (req, res) => {
         //const rand = String.fromCharCode(97 + Math.floor(Math.random() * 8));
         const id = String.fromCharCode(97 + (order % 16)) + makeId();
         order++;
-        addToRecent({ name: name, id: id })
+        //addToRecent({ name: name, id: id })
 
         let url = "";
         switch (id[0]) {
@@ -440,73 +476,16 @@ const collectionDelete = async (req, res) => {
             console.error("/collection/delete: Missing document id")
             return res.status(200).send({ error: true, message: "Missing document id" });
         }
-        //const doc = ydocs.get(id)
-        const index = recentDocument.findIndex((element) => { return element.id === id });
-        if (index >= 0) {
-            recentDocument.splice(index, 1);
+        //const doc = ydocs.get(id);
             // doc.clients.forEach(client => {
             //     client.response.status(200).send();
             // })
-            res.status(200).send({});
-
-            let url = "";
-            switch (id[0]) {
-                case 'a':
-                    url = "http://10.9.11.81:4000/collection/create";
-                    break;
-                case 'b':
-                    url = "http://10.9.11.81:4001/collection/create";
-                    break;
-                case 'c':
-                    url = "http://10.9.11.81:4002/collection/create";
-                    break;
-                case 'd':
-                    url = "http://10.9.11.81:4003/collection/create";
-                    break;
-                case 'e':
-                    url = "http://10.9.11.108:4000/collection/create";
-                    break;
-                case 'f':
-                    url = "http://10.9.11.108:4001/collection/create";
-                    break;
-                case 'g':
-                    url = "http://10.9.11.108:4002/collection/create";
-                    break;
-                case 'h':
-                    url = "http://10.9.11.108:4003/collection/create";
-                    break;
-                case 'i':
-                    url = "http://10.9.11.181:4000/collection/create";
-                    break;
-                case 'j':
-                    url = "http://10.9.11.181:4001/collection/create";
-                    break;
-                case 'k':
-                    url = "http://10.9.11.181:4002/collection/create";
-                    break;
-                case 'l':
-                    url = "http://10.9.11.181:4003/collection/create";
-                    break;
-                case 'm':
-                    url = "http://10.9.0.134:4000/collection/create";
-                    break;
-                case 'n':
-                    url = "http://10.9.0.134:4001/collection/create";
-                    break;
-                case 'o':
-                    url = "http://10.9.0.134:4002/collection/create";
-                    break;
-                default:
-                    url = "http://10.9.0.134:4003/collection/create";
-            }
-            return await axios.post(url, {
-                id: id
-            });
-        }
-        else {
-            console.error("/api/delete: Fail to find document with id from db: " + id)
-            return res.status(200).send({ error: true, message: "Fail to find document with id: " + id });
-        }
+        res.status(200).send({});
+    
+        const url = apis[id.charCodeAt(0) - 97] + '/collection/delete';
+        return await axios.post(url, {
+            id: id
+        });
     }
     catch (err) {
         console.error("/collection/delete: Error occurred: " + err);
@@ -595,25 +574,25 @@ const suggest = async (req, res) => {
     }
 }
 
-const updateRecent = async(req, res) => {
-    try {
-        const { id, name }= req.body;
-        if (!id || !name) {
-            return res.status(400).send({ error: true, message: 'Missing id or name' });
-        }
-        addToRecent({ id: id, name: name });
-        return res.status(200).send();
-    }
-    catch (e) {
-        console.error("/updateRecent: " + e);
-        return res.status(400).send({ error: true, message: "server bad"});
-    }
-}
+// const updateRecent = async(req, res) => {
+//     try {
+//         const { id, name }= req.body;
+//         if (!id || !name) {
+//             return res.status(400).send({ error: true, message: 'Missing id or name' });
+//         }
+//         addToRecent({ id: id, name: name });
+//         return res.status(200).send();
+//     }
+//     catch (e) {
+//         console.error("/updateRecent: " + e);
+//         return res.status(400).send({ error: true, message: "server bad"});
+//     }
+// }
 
 
 app.get('/index/search', search);
 app.get('/index/suggest', suggest);
-app.post('/updateRecent', updateRecent);
+//app.post('/updateRecent', updateRecent);
 
 app.post('/collection/create', collectionCreate);
 app.post('/collection/delete', collectionDelete);
@@ -639,5 +618,6 @@ app.listen(PORT, (err?) => {
 
 type document = {
     name: string,
-    id: string
+    id: string,
+    timestamp: number
 }
