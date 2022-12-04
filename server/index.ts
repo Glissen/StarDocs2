@@ -549,9 +549,9 @@ app.listen(PORT, (err?) => {
     return console.log(`Server is listening on ${PORT}`);
 });
 
-const interval = setInterval(function() {
-    elasticRefresh();
-}, 5000);
+// const interval = setInterval(function() {
+    // elasticRefresh();
+// }, 5000);
 
 type document = {
     name: string,
