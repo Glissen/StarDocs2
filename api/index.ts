@@ -45,7 +45,7 @@ const makeId = () => {
 //console.log("Serving to shard: " + shard);
 const { Client } = require('@elastic/elasticsearch')
 const elasticClient = new Client({
-    node: "http://new.renge.io:9200"
+    node: "http://10.9.11.197:9200"
 })
 
 // const bulkUpdate = async() => {
