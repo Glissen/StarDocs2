@@ -482,13 +482,15 @@ const suggest = async (req, res) => {
             if (element.highlight.name) {
                 for (let i = 0; i < element.highlight.name.length; i ++) {
                     let word = element.highlight.name[i];
-                    ans.add(word.slice(4, -5).toLowerCase());
+                    //ans.add(word.slice(4, -5).toLowerCase());
+                    ans.add(word.toLowerCase());
                 }
             }
             if (element.highlight.content) {
                 for (let i = 0; i < element.highlight.content.length; i ++) {
                     let word = element.highlight.content[i];
-                    ans.add(word.slice(4, -5).toLowerCase());
+                    //ans.add(word.slice(4, -5).toLowerCase());
+                    ans.add(word.toLowerCase());
                 }
             }
         }
