@@ -351,7 +351,7 @@ app.listen(PORT, (err?) => {
 
 const interval = setInterval(function() {
     bulkUpdate();
-}, 1500);
+}, 5000);
 
 type ydoc = {
     doc: any,
