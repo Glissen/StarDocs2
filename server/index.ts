@@ -59,6 +59,10 @@ const elasticClient = new Client({
     node: 'http://10.9.11.197:9200'
 })
 
+const elasticClient2 = new Client({
+    node: 'http://10.9.11.182:9200'
+})
+
 const elasticUpdateSettings = async() => {
     elasticClient.indices.putSettings({
         index: 'docs',
@@ -76,7 +80,7 @@ const elasticRefresh = async() => {
 }
 
 const elasticSearch = async(query: string) => {
-    return await elasticClient.search({
+    const params = {
         index: 'docs',
         query: {
             multi_match: {
@@ -100,11 +104,13 @@ const elasticSearch = async(query: string) => {
         _source: [
             "name"
         ]
-    });
+    }
+    return (Math.random() > 0.5 ? await elasticClient.search(params) : await elasticClient2.search(params));
+    //return await elasticClient.search();
 }
 
 const elasticSuggest = async(query: string) => {
-    const result = await elasticClient.search({
+    const params = {
         query: {
             bool: {
                 should: [
@@ -133,7 +139,8 @@ const elasticSuggest = async(query: string) => {
         from: 0,
         size: 10,
         _source: [""]
-    })
+    }
+    const result = (Math.random() > 0.5 ? await elasticClient.search(params) : await elasticClient2.search(params));
     return result;
 }
 
@@ -438,7 +445,6 @@ const collectionDelete = async (req, res) => {
         return res.status(200).send({ error: true, message: "An error has occurred" });
     }
 }
-
 
 const search = async (req, res) => {
     try {

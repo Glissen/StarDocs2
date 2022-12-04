@@ -41,9 +41,11 @@ const makeId = () => {
     return ID;
 }
 
+const shard = Math.random() > 0.5 ? "http://10.9.11.182:9200" : "http://10.9.11.197:9200";
+console.log("Serving to shard: " + shard);
 const { Client } = require('@elastic/elasticsearch')
 const elasticClient = new Client({
-    node: 'http://10.9.11.197:9200'
+    node: shard
 })
 
 const bulkUpdate = async() => {
