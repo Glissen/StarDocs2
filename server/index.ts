@@ -321,7 +321,7 @@ const collectionCreate = async (req, res) => {
         }
 
         //const rand = String.fromCharCode(97 + Math.floor(Math.random() * 8));
-        const id = String.fromCharCode(97 + (order % 12)) + makeId();
+        const id = String.fromCharCode(97 + (order % 16)) + makeId();
         order++;
         addToRecent({ name: name, id: id })
 
@@ -360,8 +360,20 @@ const collectionCreate = async (req, res) => {
             case 'k':
                 url = "http://10.9.11.181:4002/collection/create";
                 break;
-            default:
+            case 'l':
                 url = "http://10.9.11.181:4003/collection/create";
+                break;
+            case 'm':
+                url = "http://10.9.0.134:4000/collection/create";
+                break;
+            case 'n':
+                url = "http://10.9.0.134:4001/collection/create";
+                break;
+            case 'o':
+                url = "http://10.9.0.134:4002/collection/create";
+                break;
+            default:
+                url = "http://10.9.0.134:4003/collection/create";
         }
 
         res.status(200).send({ id: id });
@@ -444,8 +456,20 @@ const collectionDelete = async (req, res) => {
                 case 'k':
                     url = "http://10.9.11.181:4002/collection/create";
                     break;
-                default:
+                case 'l':
                     url = "http://10.9.11.181:4003/collection/create";
+                    break;
+                case 'm':
+                    url = "http://10.9.0.134:4000/collection/create";
+                    break;
+                case 'n':
+                    url = "http://10.9.0.134:4001/collection/create";
+                    break;
+                case 'o':
+                    url = "http://10.9.0.134:4002/collection/create";
+                    break;
+                default:
+                    url = "http://10.9.0.134:4003/collection/create";
             }
             return await axios.post(url, {
                 id: id
