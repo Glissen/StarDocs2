@@ -59,6 +59,12 @@ const elasticClient = new Client({
     node: 'http://new.renge.io:9200'
 })
 
+const elasticRefresh = async() => {
+    elasticClient.indices.refresh({
+        index: 'docs'
+    });
+}
+
 const elasticSearch = async(query: string) => {
     return await elasticClient.search({
         index: 'docs',
@@ -540,6 +546,10 @@ app.listen(PORT, (err?) => {
     }
     return console.log(`Server is listening on ${PORT}`);
 });
+
+const interval = setInterval(function() {
+    elasticRefresh();
+}, 5000);
 
 type document = {
     name: string,

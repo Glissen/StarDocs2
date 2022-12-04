@@ -53,7 +53,6 @@ const bulkUpdate = async() => {
             elasticUpdateDoc(ydoc.name, ydoc.doc.getText(), key);
         }
     })
-    elasticRefresh();
 }
 
 const elasticUpdateDoc = async(name: string, text: string, id: string) => {
@@ -68,11 +67,11 @@ const elasticUpdateDoc = async(name: string, text: string, id: string) => {
     });
 }
 
-const elasticRefresh = async() => {
-    elasticClient.indices.refresh({
-        index: 'docs'
-    });
-}
+// const elasticRefresh = async() => {
+//     elasticClient.indices.refresh({
+//         index: 'docs'
+//     });
+// }
 
 const elasticDeleteDoc = async(id: string) => {
     elasticClient.delete({
