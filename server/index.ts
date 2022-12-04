@@ -59,6 +59,16 @@ const elasticClient = new Client({
     node: 'http://10.9.11.197:9200'
 })
 
+const elasticUpdateSettings = async() => {
+    elasticClient.indices.putSettings({
+        index: 'docs',
+        settings: {
+            number_of_replicas: 0
+        }
+    })
+}
+elasticUpdateSettings();
+
 const elasticRefresh = async() => {
     elasticClient.indices.refresh({
         index: 'docs'
