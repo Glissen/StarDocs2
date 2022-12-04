@@ -72,7 +72,12 @@ const elasticUpdateSettings = async() => {
         index: 'docs',
         settings: {
             number_of_replicas: 0,
-            refresh_interval: '5s'
+            refresh_interval: '5s',
+            translog: {
+                durability: 'async',
+                flush_threshold_size: '10240mb',
+                sync_interval: '600s'
+            }
         }
     })
 }
@@ -88,10 +93,12 @@ const elasticSearch = async(query: string) => {
     const params = {
         index: 'docs',
         query: {
-            match: {
-                main_content: {
-                    query: query
-                }
+            multi_match: {
+                query: query,
+                fields: [
+                    "name",
+                    "content"
+                ]
             }
         },
         highlight: {
@@ -114,10 +121,13 @@ const elasticSearch = async(query: string) => {
 const elasticSuggest = async(query: string) => {
     const params = {
         query: {
-            match_phrase_prefix: {
-                main_content: {
-                    query: query
-                }
+            multi_match: {
+                query: query,
+                fields: [
+                    "name",
+                    "content"
+                ],
+                type: "phrase_prefix"
             }
         },
         highlight: {
