@@ -93,18 +93,24 @@ const elasticSearch = async(query: string) => {
     const params = {
         index: 'docs',
         query: {
-            multi_match: {
-                query: query,
-                fields: [
-                    "name",
-                    "content"
-                ]
+            // multi_match: {
+            //     query: query,
+            //     fields: [
+            //         "name",
+            //         "content"
+            //     ]
+            // }
+            match: {
+                main_content: {
+                    query: query
+                }
             }
         },
         highlight: {
             fields: {
-                name: {},
-                content: {}
+                // name: {},
+                // content: {}
+                main_content: {}
             },
             fragment_size: 0
         },
@@ -121,20 +127,26 @@ const elasticSearch = async(query: string) => {
 const elasticSuggest = async(query: string) => {
     const params = {
         query: {
-            multi_match: {
-                query: query,
-                fields: [
-                    "name",
-                    "content"
-                ],
-                type: "phrase_prefix"
+            // multi_match: {
+            //     query: query,
+            //     fields: [
+            //         "name",
+            //         "content"
+            //     ],
+            //     type: "phrase_prefix"
+            // }
+            match_phrase_prefix: {
+                main_content: {
+                    query: query
+                }
             }
         },
         highlight: {
             boundary_scanner: "word",
             fields: {
-                "content": {},
-                "name": {}
+                // "content": {},
+                // "name": {}
+                main_content: {}
             },
             pre_tags: "",
             post_tags: ""
