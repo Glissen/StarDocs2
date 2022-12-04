@@ -59,13 +59,12 @@ const { Client } = require('@elastic/elasticsearch')
 const elasticClient = new Client({
     node: 'http://10.9.11.197:9200'
 })
-// const elasticClient = new Client({
-//     node: 'http://10.9.11.197:9200'
-// })
-
-// const elasticClient2 = new Client({
-//     node: 'http://10.9.11.182:9200'
-// })
+const elasticClient1 = new Client({
+    node: 'http://10.9.11.182:9200'
+})
+const elasticClient2 = new Client({
+    node: 'http://10.9.11.248:9200'
+})
 
 const elasticUpdateSettings = async() => {
     elasticClient.indices.putSettings({
@@ -92,6 +91,7 @@ const elasticRefresh = async() => {
     });
 }
 
+let searchOrder = 0;
 const elasticSearch = async(query: string) => {
     const params = {
         index: 'docs',
@@ -115,8 +115,7 @@ const elasticSearch = async(query: string) => {
                 content: {}
                 //main_content: {}
             },
-            fragment_size: 0,
-            max_analyzed_offset: 999999
+            fragment_size: 0
         },
         from: 0,
         size: 10,
@@ -124,10 +123,23 @@ const elasticSearch = async(query: string) => {
             "name"
         ]
     }
+    
+    let rem = searchOrder % 3;
+    searchOrder++;
+    if (rem === 0) {
+        return elasticClient.search(params);
+    }
+    else if (rem === 1) {
+        return elasticClient1.search(params);
+    }
+    else {
+        return elasticClient2.search(params);
+    }
     //return (Math.random() > 0.5 ? await elasticClient.search(params) : await elasticClient2.search(params));
-    return await elasticClient.search(params);
+    //return await elasticClient.search(params);
 }
 
+let suggestOrder = 0;
 const elasticSuggest = async(query: string) => {
     const params = {
         query: {
@@ -159,9 +171,21 @@ const elasticSuggest = async(query: string) => {
         size: 10,
         _source: [""]
     }
+
+    let rem = suggestOrder % 3;
+    suggestOrder++;
+    if (rem === 0) {
+        return elasticClient.search(params);
+    }
+    else if (rem === 1) {
+        return elasticClient1.search(params);
+    }
+    else {
+        return elasticClient2.search(params);
+    }
     //const result = (Math.random() > 0.5 ? await elasticClient.search(params) : await elasticClient2.search(params));
-    const result = await elasticClient.search(params);
-    return result;
+    // const result = await elasticClient.search(params);
+    // return result;
 }
 
 
