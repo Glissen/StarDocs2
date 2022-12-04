@@ -84,12 +84,10 @@ const elasticSearch = async(query: string) => {
     const params = {
         index: 'docs',
         query: {
-            multi_match: {
-                query: query,
-                fields: [
-                    "name",
-                    "content"
-                ]
+            match: {
+                main_content: {
+                    query: query
+                }
             }
         },
         highlight: {
@@ -112,13 +110,10 @@ const elasticSearch = async(query: string) => {
 const elasticSuggest = async(query: string) => {
     const params = {
         query: {
-            multi_match: {
-                query: query,
-                fields: [
-                    "name",
-                    "content"
-                ],
-                type: "phrase_prefix"
+            match_phrase_prefix: {
+                main_content: {
+                    query: query
+                }
             }
         },
         highlight: {
