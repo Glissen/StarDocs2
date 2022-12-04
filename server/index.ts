@@ -345,12 +345,14 @@ const collectionList = async (req, res) => {
         }
 
         let recents = await getRecents();
+        console.log(recents);
         recents.sort(function(a, b) {
             return b.timestamp - a.timestamp;
         })
 
         let answers = [];
         for (let i = 0; i < recents.length && i < 10; i++) {
+            console.log(recents[i]);
             answers.push({
                 id: recents[i].id,
                 name: recents[i].name
