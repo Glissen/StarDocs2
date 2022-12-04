@@ -111,19 +111,13 @@ const elasticSearch = async(query: string) => {
 const elasticSuggest = async(query: string) => {
     const params = {
         query: {
-            bool: {
-                should: [
-                    {
-                        match_phrase_prefix: {
-                            content: query
-                        }
-                    },
-                    {
-                        match_phrase_prefix: {
-                            name: query
-                        }
-                    }
-                ]
+            multi_match: {
+                query: query,
+                fields: [
+                    "name",
+                    "content"
+                ],
+                type: "phrase_prefix"
             }
         },
         highlight: {
