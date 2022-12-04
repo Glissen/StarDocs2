@@ -68,7 +68,7 @@ const elasticUpdateSettings = async() => {
         index: 'docs',
         settings: {
             number_of_replicas: 0,
-            refresh_interval: 5
+            refresh_interval: '5s'
         }
     })
 }
