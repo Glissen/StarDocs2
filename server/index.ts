@@ -323,7 +323,8 @@ const getRecents = async() => {
     for (let i = 0; i < apis.length; i++) {
         let response = await axios.get(`${apis[i]}/recents`);
         if (response.status === 200) {
-            recents.push(response.data.docs);
+            for (let j = 0; j < response.data.docs.length; j++)
+                recents.push(response.data.docs[j]);
         }
     }
     return recents;
