@@ -116,7 +116,9 @@ const elasticSuggest = async(query: string) => {
             fields: {
                 "content": {},
                 "name": {}
-            }
+            },
+            pre_tags: "",
+            post_tags: ""
         },
         from: 0,
         size: 10,
